@@ -1,0 +1,167 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Central table for all tenants (clients) using the system
+model Tenant {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Tenant-specific branding and configuration
+  brand     TenantBrand? 
+  config    TenantConfig?
+
+  // A tenant can have many templates and notifications
+  templates Template[]
+  notifications Notification[]
+
+  // Opposite relation for UserPreference
+  userPreferences UserPreference[]
+
+  @@map("tenants")
+}
+
+// Branding details for each tenant (for email footers, etc.)
+model TenantBrand {
+  id          String   @id @default(cuid())
+  companyName String
+  logoUrl     String?
+  primaryColor String?
+  websiteUrl  String?
+  supportEmail String?
+  supportPhone String?
+  physicalAddress String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // 1-to-1 relation with Tenant
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenantId String @unique
+
+  @@map("tenant_branding")
+}
+
+model TenantEmailProvider {
+  id             String   @id @default(cuid())
+  tenantConfigId String
+  tenantConfig   TenantConfig @relation(fields: [tenantConfigId], references: [id], onDelete: Cascade)
+
+  // SMTP connection details
+  host        String   // e.g. smtp.gmail.com, smtp.office365.com, premium292.web-hosting.com
+  port        Int      // 465 (SSL), 587 (TLS), etc.
+  secure      Boolean  // true = SSL, false = STARTTLS
+  username    String   // SMTP username
+  password    String   @db.Text // keep this encrypted in production
+
+  fromEmail   String?
+  fromName    String?
+
+  isDefault   Boolean  @default(true)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("tenant_email_providers")
+}
+
+
+model TenantConfig {
+  id        String   @id @default(cuid())
+  tenantId  String   @unique
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  emailProviders TenantEmailProvider[]
+  // smsProviders   TenantSmsProvider[]  // keep SMS extensible
+  // pushProviders  TenantPushProvider[]
+
+  @@map("tenant_configurations")
+}
+
+
+// Master table for all notification templates
+model Template {
+  id          String   @id @default(cuid())
+  name        String   // Unique identifier: 'welcome-email', 'password-reset'
+  description String?
+  type        String   // 'email', 'sms', 'push', 'in-app'
+  subject     String?  // For email/push
+  body        String   // Handlebars template content
+  language    String   @default("en")
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Link to the Tenant
+  tenant   Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenantId String
+
+  // Opposite relation to Notification
+  notifications Notification[]
+
+  @@unique([tenantId, name, language]) // A tenant can have one 'welcome-email' in 'en'
+  @@map("templates")
+}
+
+// Main audit log for every notification attempt
+model Notification {
+  id        String   @id @default(cuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Target user info (as received from the event)
+  userId    String?  // ID from the source system
+  userEmail String?
+  userName  String?
+
+  // Notification details
+  channel   String   // 'email', 'sms', 'push'
+  eventType String   // e.g., 'user.registration.completed'
+  status    String   // 'queued', 'sent', 'delivered', 'failed'
+  subject   String?
+  body      String?
+
+  // Provider response and metadata
+  providerResponse Json?     // Raw response from SendGrid/Twilio (success or error)
+  externalId       String?   // e.g., SendGrid message ID, Twilio SID
+  createdAt        DateTime  @default(now())
+  sentAt           DateTime?
+
+  // Relations
+  template   Template? @relation(fields: [templateId], references: [id])
+  templateId String?
+
+  @@map("notifications")
+}
+
+// Table to store user notification preferences (opt-in/opt-out)
+model UserPreference {
+  id        String   @id @default(cuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  userId    String   // ID from the source system
+  email     Boolean  @default(true)
+  sms       Boolean  @default(false)
+  push      Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // A user should only have one preference record per tenant
+  @@unique([tenantId, userId])
+  @@map("user_preferences")
+}
