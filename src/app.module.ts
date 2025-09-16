@@ -16,6 +16,10 @@ import { TenantEmailProvidersService } from './tenant-email-providers/tenant-ema
 import { TenantEmailProvidersController } from './tenant-email-providers/tenant-email-providers.controller';
 import { UserPreferencesService } from './user-preferences/user-preferences.service';
 import { UserPreferencesController } from './user-preferences/user-preferences.controller';
+import { NotificationsController } from './notifications/notifications.controller';
+import { NotificationsService } from './notifications/notifications.service';
+import { TemplatesController } from './templates/templates.controller';
+import { TemplatesService } from './templates/templates.service';
 
 @Module({
   imports: [
@@ -34,7 +38,7 @@ import { UserPreferencesController } from './user-preferences/user-preferences.c
     EventsModule,
     EmailModule,
   ],
-  providers: [TenantsService, TenantBrandingService, TenantConfigService, TenantEmailProvidersService, UserPreferencesService],
-  controllers: [TenantsController, TenantBrandingController, TenantConfigController, TenantEmailProvidersController, UserPreferencesController]
+  providers: [TenantsService, TenantBrandingService, TenantConfigService, TenantEmailProvidersService, UserPreferencesService, NotificationsService, TemplatesService],
+  controllers: [TenantsController, TenantBrandingController, TenantConfigController, TenantEmailProvidersController, UserPreferencesController, NotificationsController, TemplatesController]
 })
 export class AppModule {}

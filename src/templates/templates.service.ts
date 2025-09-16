@@ -64,4 +64,22 @@ export class TemplatesService {
       throw new Error(`Failed to get tenant branding: ${error.message}`);
     }
   }
+  async createTemplate(dto: {
+    name: string;
+    type: string;
+    subject: string;
+    body: string;
+    language: string;
+    isActive: boolean;
+    tenantId: string;
+  }) {
+    return this.prisma.template.create({ data: dto });
+  }
+
+  async getTemplatesForTenant(tenantId: string) {
+    return this.prisma.template.findMany({
+      where: { tenantId },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
 }

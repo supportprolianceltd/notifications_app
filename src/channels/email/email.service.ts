@@ -24,15 +24,22 @@ export class EmailService {
     }
 
     try {
-  // 1. Load SMTP config from DB
-  const emailConfig = await this.tenantEmailProvidersService.getDefaultEmailProvider(tenantId);
-  this.logger.log(`Loaded email config for tenant ${tenantId}: ${JSON.stringify(emailConfig)}`);
+      // 1. Load SMTP config from DB
+      const emailConfig = await this.tenantEmailProvidersService.getDefaultEmailProvider(tenantId);
+      // Mask sensitive info in logs
+      const safeConfig = { ...emailConfig, password: emailConfig?.password ? '***' : undefined };
+      this.logger.log(`Loaded email config for tenant ${tenantId}: ${JSON.stringify(safeConfig)}`);
 
-  if (!emailConfig) {
-        this.logger.warn(`⚠️ No email provider found for tenant ${tenantId}, using console fallback`);
-        const fallback = this.createConsoleTransporter();
-        this.transporters.set(tenantId, fallback);
-        return fallback;
+      if (!emailConfig) {
+        this.logger.error(`❌ No email provider found for tenant ${tenantId}`);
+        if (process.env.NODE_ENV === 'production') {
+          throw new Error(`No email provider configured for tenant ${tenantId}`);
+        } else {
+          this.logger.warn(`⚠️ Using console fallback for tenant ${tenantId} (dev/test only)`);
+          const fallback = this.createConsoleTransporter();
+          this.transporters.set(tenantId, fallback);
+          return fallback;
+        }
       }
 
       // 2. Create transporter
@@ -53,10 +60,14 @@ export class EmailService {
       return transporter;
     } catch (err) {
       this.logger.error(`❌ Failed to init transporter for tenant ${tenantId}`, err.message);
-      this.logger.error(`❌ Failed to init transporter for tenant ${tenantId}`, err.message);
-      const fallback = this.createConsoleTransporter();
-      this.transporters.set(tenantId, fallback);
-      return fallback;
+      if (process.env.NODE_ENV === 'production') {
+        throw err;
+      } else {
+        this.logger.warn(`⚠️ Using console fallback for tenant ${tenantId} (dev/test only)`);
+        const fallback = this.createConsoleTransporter();
+        this.transporters.set(tenantId, fallback);
+        return fallback;
+      }
     }
   }
 
