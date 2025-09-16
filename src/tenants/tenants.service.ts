@@ -18,14 +18,16 @@ export class TenantsService {
         });
     }
     
-    async createTenant(createTenantDto: { name: string }) {
+    async createTenant(createTenantDto: { name: string, externalId: string }) {
     return this.prisma.$transaction(async (tx) => {
       // Create tenant
       const tenant = await tx.tenant.create({
         data: {
           name: createTenantDto.name,
+          externalId: createTenantDto.externalId,
         },
       });
+      
 
       // Create empty config for tenant
       await tx.tenantConfig.create({
@@ -37,5 +39,12 @@ export class TenantsService {
       return tenant;
     });
   }
+
+  async findTenantByExternalId(externalId: string) {
+      return this.prisma.tenant.findUnique({
+        where: { externalId },
+      });
+  }
+  
 
 }

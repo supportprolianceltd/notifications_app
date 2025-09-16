@@ -6,15 +6,29 @@ export class TenantEmailProvidersService {
   constructor(private prisma: PrismaService) {}
 
   async createEmailProvider(tenantId: string, providerData: any) {
-    // First verify tenant exists and get their config
-    const tenantConfig = await this.prisma.tenantConfig.findUnique({
+
+
+    // Get or create tenant config
+    let tenantConfig = await this.prisma.tenantConfig.findUnique({
       where: { tenantId },
       include: { emailProviders: true }
     });
 
     if (!tenantConfig) {
-      throw new NotFoundException(`Tenant config not found for tenant: ${tenantId}`);
+      await this.prisma.tenantConfig.create({
+        data: { tenantId },
+      });
+      // Fetch again to get the full object with emailProviders
+      tenantConfig = await this.prisma.tenantConfig.findUnique({
+        where: { tenantId },
+        include: { emailProviders: true }
+      });
     }
+
+    if (!tenantConfig) {
+      throw new NotFoundException(`Tenant config could not be created for tenant: ${tenantId}`);
+    }
+
 
     // If setting as default, unset any existing default
     if (providerData.isDefault) {

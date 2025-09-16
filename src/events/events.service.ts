@@ -171,6 +171,7 @@ export class EventsService {
       },
       userId: event.data.user_id,
       tenantId: event.metadata.tenant_id,
+      eventType: event.metadata.event_type,
     });
   }
 

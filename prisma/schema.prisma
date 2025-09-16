@@ -16,6 +16,7 @@ datasource db {
 // Central table for all tenants (clients) using the system
 model Tenant {
   id        String   @id @default(cuid())
+  externalId String?  @unique // New field for external system ID
   name      String   @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
