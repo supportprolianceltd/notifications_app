@@ -2,6 +2,7 @@ import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
 import { EmailService } from './email.service';
 import { Logger } from '@nestjs/common';
+import { jobsProcessedCounter } from '../../metrics/metrics.controller';
 
 @Processor('email')
 export class EmailProcessor extends WorkerHost {
@@ -18,6 +19,7 @@ export class EmailProcessor extends WorkerHost {
 
     try {
       await this.emailService.sendEmail(job.data);
+      jobsProcessedCounter.inc();
       this.logger.log(`✅ Email sent for job ${job.id}`);
       return { success: true };
     } catch (error) {

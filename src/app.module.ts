@@ -20,6 +20,7 @@ import { NotificationsController } from './notifications/notifications.controlle
 import { NotificationsService } from './notifications/notifications.service';
 import { TemplatesController } from './templates/templates.controller';
 import { TemplatesService } from './templates/templates.service';
+import { MetricsModule } from './metrics/metrics.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { TemplatesService } from './templates/templates.service';
     }),
     EventsModule,
     EmailModule,
+    MetricsModule,
   ],
   providers: [TenantsService, TenantBrandingService, TenantConfigService, TenantEmailProvidersService, UserPreferencesService, NotificationsService, TemplatesService],
   controllers: [TenantsController, TenantBrandingController, TenantConfigController, TenantEmailProvidersController, UserPreferencesController, NotificationsController, TemplatesController]

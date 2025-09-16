@@ -5,6 +5,7 @@ import * as hbs from 'handlebars';
 import { TemplatesService } from '../../templates/templates.service';
 import { NotificationsService } from '../../notifications/notifications.service';
 import { TenantEmailProvidersService } from '../../tenant-email-providers/tenant-email-providers.service';
+import { emailsSentCounter } from '../../metrics/metrics.controller';
 
 @Injectable()
 export class EmailService {
@@ -163,7 +164,8 @@ export class EmailService {
         info.messageId,
       );
 
-      this.logger.log(`✅ Email sent to ${to}`);
+  emailsSentCounter.inc();
+  this.logger.log(`✅ Email sent to ${to}`);
     } catch (err) {
       this.logger.error(`❌ Failed to send email to ${to}`, err.stack);
       if (userId) {
