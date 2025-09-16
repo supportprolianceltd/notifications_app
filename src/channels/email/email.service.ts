@@ -105,8 +105,8 @@ export class EmailService {
       // 3. Merge context
       const templateContext = {
         ...context,
-        company_name: branding?.companyName || 'Our Company',
-        support_email: branding?.supportEmail || 'support@company.com',
+        company_name: branding?.companyName,
+        support_email: branding?.supportEmail,
         logo_url: branding?.logoUrl,
         current_year: new Date().getFullYear(),
       };
@@ -132,8 +132,11 @@ export class EmailService {
       // 6. Send using tenant transporter
       const transporter = await this.getTransporterForTenant(tenantId);
 
+      // Get email config for 'from' field
+      const emailConfig = await this.tenantEmailProvidersService.getDefaultEmailProvider(tenantId);
+
       const mailOptions = {
-        from: branding?.supportEmail || 'noreply@company.com',
+        from: emailConfig?.fromEmail || branding?.supportEmail || 'noreply@company.com',
         to,
         subject: finalSubject,
         html,
