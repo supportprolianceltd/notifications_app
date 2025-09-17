@@ -18,11 +18,12 @@ export class TenantsService {
         });
     }
     
-    async createTenant(createTenantDto: { name: string, externalId: string }) {
+    async createTenant(createTenantDto: { id: string, name: string, externalId: string }) {
     return this.prisma.$transaction(async (tx) => {
       // Create tenant
       const tenant = await tx.tenant.create({
         data: {
+          id: createTenantDto.id,
           name: createTenantDto.name,
           externalId: createTenantDto.externalId,
         },

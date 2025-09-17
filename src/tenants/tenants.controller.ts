@@ -6,7 +6,7 @@ export class TenantsController {
     constructor(private readonly tenantsService: TenantsService) {}
 
     @Post()
-    async createTenant(@Body() createTenantDto: { name: string, externalId: string }) {
+    async createTenant(@Body() createTenantDto: { id: string, name: string, externalId: string }) {
         return this.tenantsService.createTenant(createTenantDto);
     }
 
