@@ -73,7 +73,21 @@ export class TemplatesService {
     isActive: boolean;
     tenantId: string;
   }) {
-    return this.prisma.template.create({ data: dto });
+
+     // Step 1: Convert [placeholders] to {{placeholders}}
+    let body = dto.body.replace(/\[([^\]]+)\]/g, '{{$1}}');
+
+    // Step 2: If it's plain text (no <p>, <h1>, etc.), convert to HTML
+    if (!/<[a-z][\s\S]*>/i.test(body)) {
+      body = this.convertPlainTextToHtml(body);
+    }
+
+    return this.prisma.template.create({ 
+      data: {
+        ...dto,
+        body,
+      }
+     });
   }
 
   async getTemplatesForTenant(tenantId: string) {
@@ -81,5 +95,14 @@ export class TemplatesService {
       where: { tenantId },
       orderBy: { createdAt: 'desc' },
     });
+  }
+
+   private convertPlainTextToHtml(input: string): string {
+    const paragraphs = input
+      .trim()
+      .split(/\n\s*\n/) // split by double newlines
+      .map((p) => `<p>${p.replace(/\n/g, '<br>')}</p>`)
+      .join('');
+    return paragraphs;
   }
 }
