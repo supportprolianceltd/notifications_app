@@ -75,7 +75,25 @@ export class TenantEmailProvidersService {
     });
 
     if (!tenantConfig || tenantConfig.emailProviders.length === 0) {
-      throw new NotFoundException(`No default email provider found for tenant: ${tenantId}`);
+      console.log(`⚠️ No email provider found for tenant: ${tenantId}, trying fallback tenant: test-tenant-1`);
+      
+      // Fallback to test-tenant-1 configuration
+      const fallbackConfig = await this.prisma.tenantConfig.findUnique({
+        where: { tenantId: 'test-tenant-1' },
+        include: {
+          emailProviders: {
+            where: { isDefault: true },
+            take: 1
+          }
+        }
+      });
+
+      if (!fallbackConfig || fallbackConfig.emailProviders.length === 0) {
+        throw new NotFoundException(`No default email provider found for tenant: ${tenantId} and fallback tenant: test-tenant-1`);
+      }
+
+      console.log(`✅ Using fallback email provider from tenant: test-tenant-1 for tenant: ${tenantId}`);
+      return fallbackConfig.emailProviders[0];
     }
 
     return tenantConfig.emailProviders[0];

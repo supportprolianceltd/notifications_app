@@ -10,10 +10,11 @@ export class EventsController {
   @Post()
   async createEvent(@Body() eventData: any) {
     try {
-      await this.eventsService.handleEvent(eventData);
+      const jobIds = await this.eventsService.handleEvent(eventData);
       return { 
         success: true, 
-        message: 'Event received and processing started' 
+        message: 'Event received and processing started',
+        jobIds: jobIds
       };
     } catch (error) {
       throw new HttpException(
