@@ -7,6 +7,7 @@ import { EventsModule } from './events/events.module';
 import { EmailModule } from './channels/email/email.module';
 import { CoreModule } from './core/core.module';
 import { TenantsModule } from './tenants/tenants.module';
+import { JobsModule } from './jobs/jobs.module';
 import { TenantBrandingService } from './tenant-branding/tenant-branding.service';
 import { TenantBrandingController } from './tenant-branding/tenant-branding.controller';
 import { TenantConfigService } from './tenant-config/tenant-config.service';
@@ -39,6 +40,7 @@ import { MetricsModule } from './metrics/metrics.module';
     EmailModule,
     MetricsModule,
     TenantsModule,
+    JobsModule,
   ],
   providers: [TenantBrandingService, TenantConfigService, TenantEmailProvidersService, UserPreferencesService, NotificationsService, TemplatesService],
   controllers: [TenantBrandingController, TenantConfigController, TenantEmailProvidersController, UserPreferencesController, NotificationsController, TemplatesController]

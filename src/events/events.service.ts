@@ -16,7 +16,7 @@ export class EventsService {
     private readonly tenantsService: TenantsService,
   ) {}
 
-  async handleEvent(eventData: any): Promise<void> {
+  async handleEvent(eventData: any): Promise<string[]> {
     // 1. Validate the incoming event data against our DTO
     const event = plainToInstance(IncomingEventDto, eventData);
     const errors = await validate(event);
@@ -37,91 +37,94 @@ export class EventsService {
     this.logger.log(`Received event: ${event.metadata.event_type}`);
 
     // 3. Route the event based on its type
+    let jobIds: string[] = [];
     try {
       switch (event.metadata.event_type) {
         case 'user.registration.completed':
-          await this.handleUserRegistration(event);
+          jobIds = await this.handleUserRegistration(event);
           break;
 
         case 'user.email.verified':
-          await this.handleUserEmailVerified(event);
+          jobIds = await this.handleUserEmailVerified(event);
           break;
 
         case 'user.login.succeeded':
-          await this.handleUserLoginSucceeded(event);
+          jobIds = await this.handleUserLoginSucceeded(event);
           break;
 
         case 'user.login.failed':
-          await this.handleUserLoginFailed(event);
+          jobIds = await this.handleUserLoginFailed(event);
           break;
 
         case 'user.password.reset.requested':
-        await this.handlePasswordReset(event);
-        break;
+          jobIds = await this.handlePasswordReset(event);
+          break;
 
         case 'invoice.payment.failed':
-        await this.handlePaymentFailed(event);
-        break;
+          jobIds = await this.handlePaymentFailed(event);
+          break;
         
         case 'task.assigned':
-          await this.handleTaskAssigned(event);
+          jobIds = await this.handleTaskAssigned(event);
           break;
         
         case 'comment.mentioned':
-          await this.handleCommentMentioned(event);
+          jobIds = await this.handleCommentMentioned(event);
           break;
 
         case 'content.liked':
-          await this.handleContentLiked(event);
+          jobIds = await this.handleContentLiked(event);
           break;
 
         case 'approval.requested':
-          await this.handleApprovalRequested(event);
+          jobIds = await this.handleApprovalRequested(event);
           break;
 
         case 'status.changed':
-          await this.handleStatusChanged(event);
+          jobIds = await this.handleStatusChanged(event);
           break;
 
         case 'deadline.approaching':
-          await this.handleDeadlineApproaching(event);
+          jobIds = await this.handleDeadlineApproaching(event);
           break;
 
         case 'access.granted':
-          await this.handleAccessGranted(event);
+          jobIds = await this.handleAccessGranted(event);
           break;
 
         case 'auth.2fa.code.requested':
-          await this.handleTwoFactorCodeRequested(event);
+          jobIds = await this.handleTwoFactorCodeRequested(event);
           break;
 
         case 'auth.2fa.attempt.failed':
-          await this.handleTwoFactorAttemptFailed(event);
+          jobIds = await this.handleTwoFactorAttemptFailed(event);
           break;
 
         case 'auth.2fa.method.changed':
-          await this.handleTwoFactorMethodChanged(event);
+          jobIds = await this.handleTwoFactorMethodChanged(event);
           break;
 
         case 'auth.2fa.backup_code.used':
-          await this.handleTwoFactorBackupCodeUsed(event);
+          jobIds = await this.handleTwoFactorBackupCodeUsed(event);
           break;
         // TODO: Add more cases for other event types
         default:
           this.logger.warn(`Unhandled event type: ${event.metadata.event_type}`);
+          jobIds = [];
       }
+      return jobIds;
     } catch (error) {
       this.logger.error(`Failed to handle event ${event.metadata.event_type}`, error.stack);
       throw error;
     }
   }
 
-  private async handleUserRegistration(event: IncomingEventDto): Promise<void> {
+  private async handleUserRegistration(event: IncomingEventDto): Promise<string[]> {
     console.log('TENANT ID IN EVENT:', event.metadata.tenant_id);
     this.logger.log(`Handling registration for user: ${event.data.user_email}`);
     
     // Add a job to the email queue instead of just logging
-    await this.emailQueue.add('welcome-email', {
+    const job = await this.emailQueue.add('welcome-email', {
       to: event.data.user_email,
       subject: 'Welcome to Our Platform!',
       template: 'welcome-email', // This will be used to fetch the template later
@@ -134,10 +137,11 @@ export class EventsService {
     });
 
     this.logger.log(`📧 Added welcome email to queue for: ${event.data.user_email}`);
+    return job.id ? [job.id] : [];
   }
 
-  private async handleUserEmailVerified(event: IncomingEventDto): Promise<void> {
-    await this.emailQueue.add('user-email-verified', {
+  private async handleUserEmailVerified(event: IncomingEventDto): Promise<string[]> {
+    const job = await this.emailQueue.add('user-email-verified', {
       to: event.data.user_email,
       subject: 'Your email has been verified!',
       template: 'user-email-verified',
@@ -149,13 +153,14 @@ export class EventsService {
       userId: event.data.user_id,
       eventType: event.metadata.event_type,
     });
+    return job.id ? [job.id] : [];
   }
 
-  private async handleUserLoginSucceeded(event: IncomingEventDto): Promise<void> {
+  private async handleUserLoginSucceeded(event: IncomingEventDto): Promise<string[]> {
     console.log('IP Address:', event.data.ip_address);
     console.log('Timestamp:', event.data.timestamp);
     console.log('Timestamp:', event.data.user_agent);
-    await this.emailQueue.add('login-succeeded', {
+    const job = await this.emailQueue.add('login-succeeded', {
       to: event.data.user_email,
       subject: 'Login Successful',
       template: 'login-succeeded',
@@ -167,10 +172,11 @@ export class EventsService {
       tenantId: event.metadata.tenant_id,
       eventType: event.metadata.event_type,
     });
+    return job.id ? [job.id] : [];
   }
 
-  private async handleUserLoginFailed(event: IncomingEventDto): Promise<void> {
-    await this.emailQueue.add('login-failed', {
+  private async handleUserLoginFailed(event: IncomingEventDto): Promise<string[]> {
+    const job = await this.emailQueue.add('login-failed', {
       to: event.data.user_email,
       subject: 'Login Failed',
       template: 'login-failed',
@@ -183,6 +189,7 @@ export class EventsService {
       tenantId: event.metadata.tenant_id,
       eventType: event.metadata.event_type,
     });
+    return job.id ? [job.id] : [];
   }
 
   private async handleUserAccountLocked(event: IncomingEventDto): Promise<void> {
@@ -215,8 +222,8 @@ export class EventsService {
   }
 
 
-  private async handlePasswordReset(event: IncomingEventDto): Promise<void> {
-    await this.emailQueue.add('password-reset', {
+  private async handlePasswordReset(event: IncomingEventDto): Promise<string[]> {
+    const job = await this.emailQueue.add('password-reset', {
       to: event.data.user_email,
       subject: 'Password Reset Request',
       template: 'password-reset',
@@ -230,10 +237,11 @@ export class EventsService {
       userName: event.data.user_name,
       eventType: event.metadata.event_type,
     });
+    return job.id ? [job.id] : [];
   }
 
-  private async handlePaymentFailed(event: IncomingEventDto): Promise<void> {
-    await this.emailQueue.add('payment-failed', {
+  private async handlePaymentFailed(event: IncomingEventDto): Promise<string[]> {
+    const job = await this.emailQueue.add('payment-failed', {
       to: event.data.user_email,
       subject: 'Payment Failed',
       template: 'payment-failed',
@@ -248,10 +256,11 @@ export class EventsService {
       userName: event.data.user_name,
       eventType: event.metadata.event_type,
     });
+    return job.id ? [job.id] : [];
   }
 
-  private async handleTaskAssigned(event: IncomingEventDto): Promise<void> {
-    await this.emailQueue.add('task-assigned', {
+  private async handleTaskAssigned(event: IncomingEventDto): Promise<string[]> {
+    const job = await this.emailQueue.add('task-assigned', {
       to: event.data.assigned_to_email,
       subject: 'New Task Assigned',
       template: 'task-assigned',
@@ -266,10 +275,11 @@ export class EventsService {
       userName: event.data.assigned_to_name,
       eventType: event.metadata.event_type,
     });
+    return job.id ? [job.id] : [];
   }
 
-  private async handleCommentMentioned(event: IncomingEventDto): Promise<void> {
-    await this.emailQueue.add('comment-mentioned', {
+  private async handleCommentMentioned(event: IncomingEventDto): Promise<string[]> {
+    const job = await this.emailQueue.add('comment-mentioned', {
       to: event.data.mentioned_user_email,
       subject: 'You were mentioned in a comment',
       template: 'comment-mentioned',
@@ -284,10 +294,11 @@ export class EventsService {
       userName: event.data.mentioned_user_name,
       eventType: event.metadata.event_type,
     });
+    return job.id ? [job.id] : [];
   }
 
-  private async handleContentLiked(event: IncomingEventDto): Promise<void> {
-    await this.emailQueue.add('content-liked', {
+  private async handleContentLiked(event: IncomingEventDto): Promise<string[]> {
+    const job = await this.emailQueue.add('content-liked', {
       to: event.data.user_email,
       subject: 'Someone liked your post!',
       template: 'content-liked',
@@ -301,10 +312,11 @@ export class EventsService {
       userId: event.data.user_id,
       eventType: event.metadata.event_type,
     });
+    return job.id ? [job.id] : [];
   }
 
-  private async handleApprovalRequested(event: IncomingEventDto): Promise<void> {
-    await this.emailQueue.add('approval-requested', {
+  private async handleApprovalRequested(event: IncomingEventDto): Promise<string[]> {
+    const job = await this.emailQueue.add('approval-requested', {
       to: event.data.user_email,
       subject: 'Your approval is required',
       template: 'approval-requested',
@@ -319,10 +331,11 @@ export class EventsService {
       userId: event.data.user_id,
       eventType: event.metadata.event_type,
     });
+    return job.id ? [job.id] : [];
   }
 
-  private async handleStatusChanged(event: IncomingEventDto): Promise<void> {
-    await this.emailQueue.add('status-changed', {
+  private async handleStatusChanged(event: IncomingEventDto): Promise<string[]> {
+    const job = await this.emailQueue.add('status-changed', {
       to: event.data.user_email,
       subject: `Status changed: ${event.data.status}`,
       template: 'status-changed',
@@ -336,10 +349,11 @@ export class EventsService {
       userId: event.data.user_id,
       eventType: event.metadata.event_type,
     });
+    return job.id ? [job.id] : [];
   }
 
-  private async handleDeadlineApproaching(event: IncomingEventDto): Promise<void> {
-    await this.emailQueue.add('deadline-approaching', {
+  private async handleDeadlineApproaching(event: IncomingEventDto): Promise<string[]> {
+    const job = await this.emailQueue.add('deadline-approaching', {
       to: event.data.user_email,
       subject: 'Deadline Approaching!',
       template: 'deadline-approaching',
@@ -353,10 +367,11 @@ export class EventsService {
       userId: event.data.user_id,
       eventType: event.metadata.event_type,
     });
+    return job.id ? [job.id] : [];
   }
 
-  private async handleAccessGranted(event: IncomingEventDto): Promise<void> {
-    await this.emailQueue.add('access-granted', {
+  private async handleAccessGranted(event: IncomingEventDto): Promise<string[]> {
+    const job = await this.emailQueue.add('access-granted', {
       to: event.data.user_email,
       subject: 'Access Granted!',
       template: 'access-granted',
@@ -370,10 +385,11 @@ export class EventsService {
       userId: event.data.user_id,
       eventType: event.metadata.event_type,
     });
+    return job.id ? [job.id] : [];
   }
 
-    private async handleTwoFactorCodeRequested(event: IncomingEventDto): Promise<void> {
-      await this.emailQueue.add('2fa-code-requested', {
+    private async handleTwoFactorCodeRequested(event: IncomingEventDto): Promise<string[]> {
+      const job = await this.emailQueue.add('2fa-code-requested', {
         to: event.data.user_email,
         subject: 'Your Two-Factor Authentication Code',
         template: '2fa-code-requested',
@@ -389,10 +405,11 @@ export class EventsService {
         tenantId: event.metadata.tenant_id,
         eventType: event.metadata.event_type,
       });
+      return job.id ? [job.id] : [];
     }
 
-    private async handleTwoFactorAttemptFailed(event: IncomingEventDto): Promise<void> {
-      await this.emailQueue.add('2fa-attempt-failed', {
+    private async handleTwoFactorAttemptFailed(event: IncomingEventDto): Promise<string[]> {
+      const job = await this.emailQueue.add('2fa-attempt-failed', {
         to: event.data.user_email,
         subject: 'Failed Two-Factor Authentication Attempt',
         template: '2fa-attempt-failed',
@@ -405,10 +422,11 @@ export class EventsService {
         tenantId: event.metadata.tenant_id,
         eventType: event.metadata.event_type,
       });
+      return job.id ? [job.id] : [];
     }
 
-    private async handleTwoFactorMethodChanged(event: IncomingEventDto): Promise<void> {
-      await this.emailQueue.add('2fa-method-changed', {
+    private async handleTwoFactorMethodChanged(event: IncomingEventDto): Promise<string[]> {
+      const job = await this.emailQueue.add('2fa-method-changed', {
         to: event.data.user_email,
         subject: 'Your Two-Factor Authentication Method Was Changed',
         template: '2fa-method-changed',
@@ -422,10 +440,11 @@ export class EventsService {
         tenantId: event.metadata.tenant_id,
         eventType: event.metadata.event_type,
       });
+      return job.id ? [job.id] : [];
     }
 
-    private async handleTwoFactorBackupCodeUsed(event: IncomingEventDto): Promise<void> {
-      await this.emailQueue.add('2fa-backup-code-used', {
+    private async handleTwoFactorBackupCodeUsed(event: IncomingEventDto): Promise<string[]> {
+      const job = await this.emailQueue.add('2fa-backup-code-used', {
         to: event.data.user_email,
         subject: 'Backup Code Used for Account Access',
         template: '2fa-backup-code-used',
@@ -439,5 +458,6 @@ export class EventsService {
         tenantId: event.metadata.tenant_id,
         eventType: event.metadata.event_type,
       });
+      return job.id ? [job.id] : [];
     }
 }
