@@ -1,6 +1,7 @@
 // src/notifications/notifications.service.ts
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class NotificationsService {
@@ -21,9 +22,35 @@ export class NotificationsService {
     externalId?: string;
     templateId?: string;
   }) {
-    return this.prisma.notification.create({
-      data: notificationData,
-    });
+    try {
+      return await this.prisma.notification.create({
+        data: notificationData,
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        // Handle known Prisma errors
+        // Foreign key violation
+        if (error.code === 'P2003') {
+          console.error('❌ Foreign key violation:', error.meta);
+          console.error(`❌ Tenant '${notificationData.tenantId}' does not exist in the database`);
+          
+          // Create a custom error that identifies this as a tenant issue
+          const customError = new Error(`Tenant '${notificationData.tenantId}' does not exist`);
+          customError.name = 'TenantNotFoundError';
+          throw customError;
+        }
+
+        // Unique constraint violation
+        if (error.code === 'P2002') {
+          console.error('❌ Unique constraint violation:', error.meta);
+          throw new Error('Duplicate record not allowed');
+        }
+      }
+
+      // Log and rethrow for unknown errors
+      console.error('⚠️ Unexpected Prisma error:', error);
+      throw error;
+    }
   }
 
   async getNotificationLogsForUser(tenantId: string, userId: string) {

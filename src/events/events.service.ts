@@ -1,10 +1,11 @@
 // src/events/events.service.ts
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { IncomingEventDto } from './dto/incoming-event.dto';
 import { validate } from 'class-validator';
 import { plainToInstance } from 'class-transformer';
+import { TenantsService } from '../tenants/tenants.service';
 
 @Injectable()
 export class EventsService {
@@ -12,6 +13,7 @@ export class EventsService {
 
   constructor(
     @InjectQueue('email') private readonly emailQueue: Queue, // Inject the email queue
+    private readonly tenantsService: TenantsService,
   ) {}
 
   async handleEvent(eventData: any): Promise<void> {
@@ -24,9 +26,17 @@ export class EventsService {
       throw new Error(`Event validation failed: ${JSON.stringify(errors)}`);
     }
 
+    // 2. Validate tenant exists before processing
+    const tenantId = event.metadata.tenant_id;
+    const tenant = await this.tenantsService.getTenant(tenantId);
+    if (!tenant) {
+      this.logger.error(`❌ Tenant '${tenantId}' does not exist`);
+      throw new BadRequestException(`Tenant '${tenantId}' does not exist`);
+    }
+
     this.logger.log(`Received event: ${event.metadata.event_type}`);
 
-    // 2. Route the event based on its type
+    // 3. Route the event based on its type
     try {
       switch (event.metadata.event_type) {
         case 'user.registration.completed':

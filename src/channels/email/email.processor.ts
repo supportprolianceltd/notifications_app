@@ -23,6 +23,14 @@ export class EmailProcessor extends WorkerHost {
       this.logger.log(`✅ Email sent for job ${job.id}`);
       return { success: true };
     } catch (error) {
+      // Handle tenant-specific errors - don't retry these
+      if (error.name === 'TenantNotFoundError' || error.message?.includes('Tenant') && error.message?.includes('does not exist')) {
+        this.logger.error(`❌ Job ${job.id} failed - Tenant does not exist: ${error.message}`);
+        this.logger.error(`🚫 Not retrying job ${job.id} - tenant validation error`);
+        jobsProcessedCounter.inc({ status: 'failed', reason: 'tenant_not_found' });
+        return { success: false, error: error.message, reason: 'tenant_not_found', retry: false };
+      }
+
       this.logger.error(`❌ Failed email job ${job.id}: ${error.message}`);
       
       if (attemptsMade < this.maxRetries) {
@@ -31,6 +39,7 @@ export class EmailProcessor extends WorkerHost {
       }
       
       this.logger.error(`💥 Job ${job.id} failed after ${this.maxRetries} attempts`);
+      jobsProcessedCounter.inc({ status: 'failed', reason: 'max_retries_exceeded' });
       return { success: false, error: error.message };
     }
   }

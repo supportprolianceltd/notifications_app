@@ -6,8 +6,7 @@ import { AppConfigService } from './config/config.service';
 import { EventsModule } from './events/events.module';
 import { EmailModule } from './channels/email/email.module';
 import { CoreModule } from './core/core.module';
-import { TenantsService } from './tenants/tenants.service';
-import { TenantsController } from './tenants/tenants.controller';
+import { TenantsModule } from './tenants/tenants.module';
 import { TenantBrandingService } from './tenant-branding/tenant-branding.service';
 import { TenantBrandingController } from './tenant-branding/tenant-branding.controller';
 import { TenantConfigService } from './tenant-config/tenant-config.service';
@@ -39,8 +38,9 @@ import { MetricsModule } from './metrics/metrics.module';
     EventsModule,
     EmailModule,
     MetricsModule,
+    TenantsModule,
   ],
-  providers: [TenantsService, TenantBrandingService, TenantConfigService, TenantEmailProvidersService, UserPreferencesService, NotificationsService, TemplatesService],
-  controllers: [TenantsController, TenantBrandingController, TenantConfigController, TenantEmailProvidersController, UserPreferencesController, NotificationsController, TemplatesController]
+  providers: [TenantBrandingService, TenantConfigService, TenantEmailProvidersService, UserPreferencesService, NotificationsService, TemplatesService],
+  controllers: [TenantBrandingController, TenantConfigController, TenantEmailProvidersController, UserPreferencesController, NotificationsController, TemplatesController]
 })
 export class AppModule {}

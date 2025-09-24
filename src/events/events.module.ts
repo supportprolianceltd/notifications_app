@@ -4,6 +4,7 @@ import { EventsService } from './events.service';
 import { EventsProcessor } from './events.processor';
 import { EmailModule } from 'src/channels/email/email.module';
 import { EventsController } from './events.controller';
+import { TenantsModule } from '../tenants/tenants.module';
 
 @Module({
   imports: [
@@ -11,7 +12,8 @@ import { EventsController } from './events.controller';
     BullModule.registerQueue({
       name: 'events',
     }),
-    EmailModule
+    EmailModule,
+    TenantsModule
   ],
   providers: [EventsService, EventsProcessor],
   exports: [BullModule],
