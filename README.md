@@ -36,7 +36,7 @@ graph TD
 - **Templating**: Handlebars
 - **Email**: Nodemailer with SMTP support
 - **API**: RESTful endpoints with validation
-- **Deployment**: Ready for Docker & Fly.io
+- **Deployment**: Ready for Docker
 
 ## 🚀 Quick Start
 
