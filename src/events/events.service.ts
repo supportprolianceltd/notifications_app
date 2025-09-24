@@ -107,6 +107,15 @@ export class EventsService {
         case 'auth.2fa.backup_code.used':
           jobIds = await this.handleTwoFactorBackupCodeUsed(event);
           break;
+
+        case 'candidate.shortlisted':
+          jobIds = await this.handleCandidateShortlisted(event);
+          break;
+
+        case 'interview.scheduled':
+          jobIds = await this.handleInterviewScheduled(event);
+          break;
+
         // TODO: Add more cases for other event types
         default:
           this.logger.warn(`Unhandled event type: ${event.metadata.event_type}`);
@@ -460,4 +469,64 @@ export class EventsService {
       });
       return job.id ? [job.id] : [];
     }
+
+    private async handleCandidateShortlisted(event: IncomingEventDto): Promise<string[]> {
+        this.logger.log(`Handling candidate shortlisted for: ${event.data.email}`);
+        
+        const job = await this.emailQueue.add('candidate-shortlisted', {
+          to: event.data.email,
+          subject: 'Congratulations! You have been shortlisted',
+          template: 'candidate-shortlisted',
+          context: {
+            full_name: event.data.full_name,
+            job_requisition_id: event.data.job_requisition_id,
+            score: event.data.score,
+            screening_status: event.data.screening_status,
+            employment_gaps: event.data.employment_gaps,
+            document_type: event.data.document_type,
+            application_id: event.data.application_id,
+            status: event.data.status,
+          },
+          tenantId: event.metadata.tenant_id,
+          userId: event.data.application_id, // Using application_id as userId for tracking
+          userName: event.data.full_name,
+          eventType: event.metadata.event_type,
+        });
+
+        this.logger.log(`📧 Added candidate shortlisted email to queue for: ${event.data.email}`);
+        return job.id ? [job.id] : [];
+      }
+
+    private async handleInterviewScheduled(event: IncomingEventDto): Promise<string[]> {
+        this.logger.log(`Handling interview scheduled for: ${event.data.email}`);
+        
+        const job = await this.emailQueue.add('interview-scheduled', {
+          to: event.data.email,
+          subject: 'Interview Scheduled - Please Confirm Your Availability',
+          template: 'interview-scheduled',
+          context: {
+            full_name: event.data.full_name,
+            job_requisition_id: event.data.job_requisition_id,
+            application_id: event.data.application_id,
+            status: event.data.status,
+            interview_start_date_time: event.data.interview_start_date_time,
+            interview_end_date_time: event.data.interview_end_date_time,
+            meeting_mode: event.data.meeting_mode,
+            meeting_link: event.data.meeting_link,
+            interview_address: event.data.interview_address,
+            message: event.data.message,
+            timezone: event.data.timezone,
+            schedule_id: event.data.schedule_id,
+          },
+          tenantId: event.metadata.tenant_id,
+          userId: event.data.application_id, // Using application_id as userId for tracking
+          userName: event.data.full_name,
+          eventType: event.metadata.event_type,
+        });
+
+        this.logger.log(`📧 Added interview scheduled email to queue for: ${event.data.email}`);
+        return job.id ? [job.id] : [];
+      }
+
+    
 }
