@@ -116,6 +116,10 @@ export class EventsService {
           jobIds = await this.handleInterviewScheduled(event);
           break;
 
+        case 'candidate.shortlisted.gaps':
+          jobIds = await this.handleCandidateShortlistedWithGaps(event);
+          break;
+
         // TODO: Add more cases for other event types
         default:
           this.logger.warn(`Unhandled event type: ${event.metadata.event_type}`);
@@ -528,5 +532,59 @@ export class EventsService {
         return job.id ? [job.id] : [];
       }
 
+      private async handleCandidateShortlistedWithGaps(event: IncomingEventDto): Promise<string[]> {
+        this.logger.log(`Handling candidate shortlisted with gaps for: ${event.data.email}`);
+        
+        const job = await this.emailQueue.add('candidate-shortlisted-gaps', {
+          to: event.data.email,
+          subject: 'Congratulations! You have been shortlisted - Additional Information Required',
+          template: 'candidate-shortlisted-gaps',
+          context: {
+            full_name: event.data.full_name,
+            job_requisition_id: event.data.job_requisition_id,
+            score: event.data.score,
+            screening_status: event.data.screening_status,
+            employment_gaps: event.data.employment_gaps, // Array of gap objects
+            document_type: event.data.document_type,
+            application_id: event.data.application_id,
+            status: event.data.status,
+            gaps_count: event.data.employment_gaps?.length || 0,
+            total_gap_duration: this.calculateTotalGapDuration(event.data.employment_gaps),
+          },
+          tenantId: event.metadata.tenant_id,
+          userId: event.data.application_id,
+          userName: event.data.full_name,
+          eventType: event.metadata.event_type,
+        });
+
+        this.logger.log(`📧 Added candidate shortlisted with gaps email to queue for: ${event.data.email}`);
+        return job.id ? [job.id] : [];
+      }
+
+
+      // Helper method to calculate total gap duration
+      private calculateTotalGapDuration(gaps: any[]): string {
+        if (!gaps || gaps.length === 0) return '0 months';
+        
+        let totalMonths = 0;
+        gaps.forEach(gap => {
+          // Extract months from duration string like "6 months" or "1.5 years"
+          const duration = gap.duration.toLowerCase();
+          if (duration.includes('year')) {
+            const years = parseFloat(duration.match(/[\d.]+/)[0]);
+            totalMonths += years * 12;
+          } else if (duration.includes('month')) {
+            const months = parseFloat(duration.match(/[\d.]+/)[0]);
+            totalMonths += months;
+          }
+        });
+        
+        if (totalMonths >= 12) {
+          const years = Math.floor(totalMonths / 12);
+          const remainingMonths = totalMonths % 12;
+          return remainingMonths > 0 ? `${years} years ${remainingMonths} months` : `${years} years`;
+        }
+        return `${totalMonths} months`;
+      }
     
 }
