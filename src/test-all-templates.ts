@@ -843,6 +843,228 @@ async function testAllTemplates() {
         isActive: true,
         tenantId: 'global',
       },
+
+      // Add this template to your allTemplates array in test-all-templates.ts
+{
+  id: 'template-candidate-shortlisted-gaps',
+  name: 'candidate-shortlisted-gaps',
+  type: 'email',
+  subject: 'Congratulations! You have been shortlisted - Additional Information Required',
+  body: `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shortlisted - Employment Gap Information Required</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f8f9fa;
+    }
+    .container {
+      background: white;
+      padding: 40px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid #28a745;
+    }
+    .success-icon {
+      font-size: 48px;
+      color: #28a745;
+      margin-bottom: 10px;
+    }
+    h1 {
+      color: #28a745;
+      margin: 0;
+      font-size: 28px;
+    }
+    .details-box {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+      border-left: 4px solid #28a745;
+    }
+    .gaps-section {
+      background: #fff3cd;
+      border: 1px solid #ffeaa7;
+      padding: 20px;
+      border-radius: 8px;
+      border-left: 4px solid #f1c40f;
+      margin: 20px 0;
+    }
+    .gap-item {
+      background: white;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 6px;
+      border-left: 3px solid #e74c3c;
+    }
+    .detail-row {
+      margin: 10px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .detail-label {
+      font-weight: 600;
+      color: #495057;
+      min-width: 140px;
+    }
+    .detail-value {
+      color: #212529;
+      flex: 1;
+      margin-left: 10px;
+    }
+    .score-highlight {
+      background: #28a745;
+      color: white;
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-weight: bold;
+      display: inline-block;
+    }
+    .gaps-highlight {
+      background: #f39c12;
+      color: white;
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-weight: bold;
+      display: inline-block;
+    }
+    .action-required {
+      background: #e7f3ff;
+      padding: 20px;
+      border-radius: 8px;
+      border-left: 4px solid #007bff;
+      margin: 20px 0;
+    }
+    .footer {
+      text-align: center;
+      padding-top: 20px;
+      border-top: 1px solid #dee2e6;
+      color: #6c757d;
+      font-size: 14px;
+    }
+    @media (max-width: 600px) {
+      body { padding: 10px; }
+      .container { padding: 20px; }
+      h1 { font-size: 24px; }
+      .detail-row { flex-direction: column; align-items: flex-start; }
+      .detail-label { min-width: auto; margin-bottom: 5px; }
+      .detail-value { margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="success-icon">🎉</div>
+      <h1>Congratulations!</h1>
+      <p style="margin: 10px 0 0 0; color: #6c757d; font-size: 18px;">You've Been Shortlisted</p>
+    </div>
+
+    <div class="content">
+      <p>Dear <strong>{{full_name}}</strong>,</p>
+      
+      <p>We are excited to inform you that your application has been successfully shortlisted for the position! Your profile shows great potential, and we would like to move forward with your candidacy.</p>
+
+      <div class="details-box">
+        <h3 style="margin-top: 0; color: #28a745;">📋 Application Details</h3>
+        
+        <div class="detail-row">
+          <span class="detail-label">Application ID:</span>
+          <span class="detail-value"><code>{{application_id}}</code></span>
+        </div>
+        
+        <div class="detail-row">
+          <span class="detail-label">Job Requisition:</span>
+          <span class="detail-value"><code>{{job_requisition_id}}</code></span>
+        </div>
+        
+        <div class="detail-row">
+          <span class="detail-label">Current Status:</span>
+          <span class="detail-value"><strong style="color: #28a745; text-transform: capitalize;">{{status}}</strong></span>
+        </div>
+        
+        <div class="detail-row">
+          <span class="detail-label">Screening Score:</span>
+          <span class="detail-value"><span class="score-highlight">{{score}}/100</span></span>
+        </div>
+        
+        <div class="detail-row">
+          <span class="detail-label">Employment Gaps Found:</span>
+          <span class="detail-value"><span class="gaps-highlight">{{gaps_count}} gaps ({{total_gap_duration}})</span></span>
+        </div>
+      </div>
+
+      <div class="gaps-section">
+        <h3 style="margin-top: 0; color: #f39c12;">⚠️ Employment Gaps Identified</h3>
+        <p>During our review of your application, we identified the following employment gaps that we'd like to discuss with you:</p>
+        
+        {{#each employment_gaps}}
+        <div class="gap-item">
+          <div class="detail-row">
+            <span class="detail-label">Gap Period:</span>
+            <span class="detail-value"><strong>{{start_date}} to {{end_date}}</strong></span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Duration:</span>
+            <span class="detail-value">{{duration}}</span>
+          </div>
+        </div>
+        {{/each}}
+        
+        <p><strong>Total Gap Duration:</strong> {{total_gap_duration}}</p>
+      </div>
+
+      <div class="action-required">
+        <h3 style="margin-top: 0; color: #007bff;">📝 Next Steps - Action Required</h3>
+        <p>To proceed with your application, we need you to provide brief explanations for the employment gaps identified above. This is a standard part of our screening process.</p>
+        
+        <p><strong>Please prepare to discuss:</strong></p>
+        <ul style="margin: 10px 0; padding-left: 20px;">
+          <li>What you were doing during each gap period</li>
+          <li>Any relevant activities (education, travel, family care, freelancing, etc.)</li>
+          <li>Skills or experiences gained during these periods</li>
+          <li>Any challenges or circumstances that contributed to the gaps</li>
+        </ul>
+        
+        <p><strong>Timeline:</strong> Our HR team will contact you within the next 2-3 business days to schedule a brief discussion about these gaps.</p>
+      </div>
+
+      <p>We understand that career paths can have various twists and turns, and we're committed to hearing your full story. Employment gaps don't disqualify candidates - we simply want to understand your complete professional journey.</p>
+
+      <p>Thank you for your interest in joining our organization, and we look forward to learning more about your experiences!</p>
+
+      <p style="margin-top: 30px;">
+        Best regards,<br>
+        <strong>{{company_name}} Recruitment Team</strong>
+      </p>
+    </div>
+
+    <div class="footer">
+      <p>This is an automated message regarding your job application.</p>
+      <p>If you have any questions about the employment gaps or this process, please contact our HR department.</p>
+    </div>
+  </div>
+</body>
+</html>`,
+  language: 'en',
+  isActive: true,
+  tenantId: 'global',
+},
     ];
 
     // Create all templates
@@ -951,6 +1173,32 @@ async function testAllTemplates() {
           message: 'Please join 5 minutes early',
           timezone: 'Africa/Lagos',
           schedule_id: 'schedule-test-999'
+        }
+      },
+      // Add this test event to your testEvents array in test-all-templates.ts
+      {
+        event_type: 'candidate.shortlisted.gaps',
+        data: {
+          application_id: 'app-test-33333',
+          full_name: 'Sarah Johnson',
+          email: 'tegaokorare91@gmail.com',
+          job_requisition_id: 'job-67890',
+          status: 'shortlisted',
+          score: 78.5,
+          screening_status: 'processed',
+          employment_gaps: [
+            {
+              start_date: '2020-03-01',
+              end_date: '2020-12-31',
+              duration: '10 months'
+            },
+            {
+              start_date: '2022-06-01',
+              end_date: '2023-01-31',
+              duration: '8 months'
+            }
+          ],
+          document_type: 'resume'
         }
       }
 ];
