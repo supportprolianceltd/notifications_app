@@ -1,7 +1,3 @@
-SETUP.JS
-
-// setup.js
-
 const { execSync } = require('child_process');
 const { Client } = require('pg');
 require('dotenv').config();
