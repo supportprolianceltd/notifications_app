@@ -1065,6 +1065,299 @@ async function testAllTemplates() {
   isActive: true,
   tenantId: 'global',
 },
+// Add this template to your allTemplates array in test-all-templates.ts
+{
+  id: 'template-interview-rescheduled',
+  name: 'interview-rescheduled',
+  type: 'email',
+  subject: 'Interview Rescheduled - New Date and Time',
+  body: `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interview Rescheduled - Important Update</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f8f9fa;
+    }
+    .container {
+      background: white;
+      padding: 40px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid #ffc107;
+    }
+    .update-icon {
+      font-size: 48px;
+      color: #ffc107;
+      margin-bottom: 10px;
+    }
+    .cancelled-header {
+      border-bottom: 2px solid #dc3545;
+    }
+    .cancelled-icon {
+      color: #dc3545;
+    }
+    h1 {
+      color: #ffc107;
+      margin: 0;
+      font-size: 28px;
+    }
+    .cancelled-title {
+      color: #dc3545;
+    }
+    .alert-box {
+      background: #fff3cd;
+      border: 1px solid #ffeaa7;
+      padding: 20px;
+      border-radius: 8px;
+      border-left: 4px solid #ffc107;
+      margin: 20px 0;
+    }
+    .cancelled-alert {
+      background: #f8d7da;
+      border: 1px solid #f5c6cb;
+      border-left: 4px solid #dc3545;
+    }
+    .new-schedule {
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+      color: white;
+      padding: 25px;
+      border-radius: 10px;
+      margin: 25px 0;
+      text-align: center;
+    }
+    .cancelled-schedule {
+      background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    }
+    .schedule-time {
+      font-size: 24px;
+      font-weight: bold;
+      margin: 10px 0;
+    }
+    .meeting-info {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+      border-left: 4px solid #007bff;
+    }
+    .meeting-link {
+      background: #007bff;
+      color: white;
+      padding: 12px 25px;
+      text-decoration: none;
+      border-radius: 5px;
+      display: inline-block;
+      margin: 10px 0;
+      font-weight: bold;
+    }
+    .meeting-link:hover {
+      background: #0056b3;
+      color: white;
+    }
+    .reason-box {
+      background: #e9ecef;
+      padding: 15px;
+      border-radius: 6px;
+      margin: 15px 0;
+      border-left: 3px solid #6c757d;
+    }
+    .important-note {
+      background: #d1ecf1;
+      border: 1px solid #bee5eb;
+      padding: 15px;
+      border-radius: 5px;
+      border-left: 3px solid #17a2b8;
+      margin: 20px 0;
+    }
+    .footer {
+      text-align: center;
+      padding-top: 20px;
+      border-top: 1px solid #dee2e6;
+      color: #6c757d;
+      font-size: 14px;
+    }
+    .detail-row {
+      margin: 10px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .detail-label {
+      font-weight: 600;
+      color: #495057;
+      min-width: 120px;
+    }
+    .detail-value {
+      color: #212529;
+      flex: 1;
+      margin-left: 10px;
+    }
+    @media (max-width: 600px) {
+      body { padding: 10px; }
+      .container { padding: 20px; }
+      h1 { font-size: 24px; }
+      .schedule-time { font-size: 20px; }
+      .detail-row { flex-direction: column; align-items: flex-start; }
+      .detail-label { min-width: auto; margin-bottom: 5px; }
+      .detail-value { margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header {{#if is_cancelled}}cancelled-header{{/if}}">
+      <div class="update-icon {{#if is_cancelled}}cancelled-icon{{/if}}">
+        {{#if is_cancelled}}❌{{else}}🔄{{/if}}
+      </div>
+      <h1 {{#if is_cancelled}}class="cancelled-title"{{/if}}>
+        {{#if is_cancelled}}Interview Cancelled{{else}}Interview Rescheduled{{/if}}
+      </h1>
+      <p style="margin: 10px 0 0 0; color: #6c757d; font-size: 18px;">
+        {{#if is_cancelled}}We apologize for the inconvenience{{else}}Please note the new date and time{{/if}}
+      </p>
+    </div>
+
+    <div class="content">
+      <p>Dear <strong>{{full_name}}</strong>,</p>
+      
+      {{#if is_cancelled}}
+      <p>We regret to inform you that your scheduled interview has been cancelled. We sincerely apologize for any inconvenience this may cause.</p>
+      {{else}}
+      <p>We need to reschedule your interview due to unforeseen circumstances. Please find the new interview details below:</p>
+      {{/if}}
+
+      {{#unless is_cancelled}}
+      <div class="new-schedule">
+        <h3 style="margin-top: 0;">📅 New Interview Schedule</h3>
+        <div class="schedule-time">{{interview_start_date_time}}</div>
+        <p>Duration: {{interview_start_date_time}} - {{interview_end_date_time}}</p>
+        <p><strong>Timezone:</strong> {{timezone}}</p>
+      </div>
+      {{/unless}}
+
+      {{#if is_cancelled}}
+      <div class="new-schedule cancelled-schedule">
+        <h3 style="margin-top: 0;">❌ Interview Cancelled</h3>
+        <p style="font-size: 18px; margin: 0;">We will contact you shortly to reschedule</p>
+      </div>
+      {{/if}}
+
+      <div class="meeting-info">
+        <h4 style="margin-top: 0; color: #007bff;">📋 Interview Details</h4>
+        
+        <div class="detail-row">
+          <span class="detail-label">Application ID:</span>
+          <span class="detail-value"><code>{{application_id}}</code></span>
+        </div>
+        
+        <div class="detail-row">
+          <span class="detail-label">Schedule ID:</span>
+          <span class="detail-value"><code>{{schedule_id}}</code></span>
+        </div>
+        
+        <div class="detail-row">
+          <span class="detail-label">Job Requisition:</span>
+          <span class="detail-value"><code>{{job_requisition_id}}</code></span>
+        </div>
+        
+        <div class="detail-row">
+          <span class="detail-label">Status:</span>
+          <span class="detail-value"><strong style="text-transform: capitalize; {{#if is_cancelled}}color: #dc3545;{{else}}color: #ffc107;{{/if}}">{{status}}</strong></span>
+        </div>
+        
+        {{#unless is_cancelled}}
+        <div class="detail-row">
+          <span class="detail-label">Meeting Mode:</span>
+          <span class="detail-value" style="text-transform: capitalize;"><strong>{{meeting_mode}}</strong></span>
+        </div>
+
+        {{#if meeting_link}}
+        <div style="text-align: center; margin: 20px 0;">
+          <p><strong>Join the interview:</strong></p>
+          <a href="{{meeting_link}}" class="meeting-link">Join Virtual Meeting</a>
+        </div>
+        {{/if}}
+
+        {{#if interview_address}}
+        <div class="detail-row">
+          <span class="detail-label">Address:</span>
+          <span class="detail-value">{{interview_address}}</span>
+        </div>
+        {{/if}}
+        {{/unless}}
+      </div>
+
+      {{#if cancellation_reason}}
+      <div class="reason-box">
+        <h4 style="margin-top: 0; color: #6c757d;">📝 Reason for {{#if is_cancelled}}Cancellation{{else}}Reschedule{{/if}}</h4>
+        <p style="margin-bottom: 0;">{{cancellation_reason}}</p>
+      </div>
+      {{/if}}
+
+      {{#if message}}
+      <div class="alert-box {{#if is_cancelled}}cancelled-alert{{/if}}">
+        <h4 style="margin-top: 0; color: {{#if is_cancelled}}#721c24{{else}}#856404{{/if}};">💬 Additional Message</h4>
+        <p style="margin-bottom: 0;">{{message}}</p>
+      </div>
+      {{/if}}
+
+      {{#unless is_cancelled}}
+      <div class="important-note">
+        <h4 style="margin-top: 0; color: #0c5460;">⚠️ Important Reminders</h4>
+        <ul style="margin-bottom: 0; padding-left: 20px;">
+          <li>Please confirm your attendance for the new time slot</li>
+          <li>Update your calendar with the new interview time</li>
+          <li>Join the meeting 5-10 minutes early if virtual, or arrive 15 minutes early if in-person</li>
+          <li>Contact us immediately if the new time doesn't work for you</li>
+        </ul>
+      </div>
+      {{/unless}}
+
+      {{#if is_cancelled}}
+      <div class="important-note">
+        <h4 style="margin-top: 0; color: #0c5460;">📞 Next Steps</h4>
+        <ul style="margin-bottom: 0; padding-left: 20px;">
+          <li>Our HR team will contact you within 24-48 hours to reschedule</li>
+          <li>Please reply to this email if you have any urgent questions</li>
+          <li>We remain interested in your candidacy and apologize for the inconvenience</li>
+        </ul>
+      </div>
+      {{/if}}
+
+      <p>{{#if is_cancelled}}We sincerely apologize for this inconvenience and appreciate your understanding. We remain committed to moving forward with your application.{{else}}We apologize for any inconvenience caused by this schedule change and appreciate your flexibility.{{/if}}</p>
+
+      <p style="margin-top: 30px;">
+        Best regards,<br>
+        <strong>{{company_name}} HR Team</strong>
+      </p>
+    </div>
+
+    <div class="footer">
+      <p>This is an automated interview {{#if is_cancelled}}cancellation{{else}}rescheduling{{/if}} notification.</p>
+      <p>Please contact HR if you have any questions or concerns.</p>
+    </div>
+  </div>
+</body>
+</html>`,
+  language: 'en',
+  isActive: true,
+  tenantId: 'global',
+},
     ];
 
     // Create all templates
@@ -1200,7 +1493,7 @@ async function testAllTemplates() {
           ],
           document_type: 'resume'
         }
-      }
+      },
 ];
 
     for (const testEvent of testEvents) {
