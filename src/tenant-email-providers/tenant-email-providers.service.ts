@@ -89,7 +89,8 @@ export class TenantEmailProvidersService {
       });
 
       if (!fallbackConfig || fallbackConfig.emailProviders.length === 0) {
-        throw new NotFoundException(`No default email provider found for tenant: ${tenantId} and fallback tenant: test-tenant-1`);
+        console.log(`⚠️ No fallback email provider found either, returning null to use system default`);
+        return null;
       }
 
       console.log(`✅ Using fallback email provider from tenant: test-tenant-1 for tenant: ${tenantId}`);

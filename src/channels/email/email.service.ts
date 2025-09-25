@@ -32,14 +32,18 @@ export class EmailService {
       this.logger.log(`Loaded email config for tenant ${tenantId}: ${JSON.stringify(safeConfig)}`);
 
       if (!emailConfig) {
-        this.logger.error(`❌ No email provider found for tenant ${tenantId}`);
-        if (process.env.NODE_ENV === 'production') {
-          throw new Error(`No email provider configured for tenant ${tenantId}`);
-        } else {
-          this.logger.warn(`⚠️ Using console fallback for tenant ${tenantId} (dev/test only)`);
-          const fallback = this.createConsoleTransporter();
-          this.transporters.set(tenantId, fallback);
-          return fallback;
+        this.logger.warn(`⚠️ No email provider found for tenant ${tenantId}, using default configuration`);
+        const defaultConfig = this.getDefaultEmailConfig();
+        const transporter = nodemailer.createTransport(defaultConfig);
+        
+        try {
+          await transporter.verify();
+          this.logger.log(`✅ Verified default transporter for tenant ${tenantId}`);
+          this.transporters.set(tenantId, transporter);
+          return transporter;
+        } catch (err) {
+          this.logger.error(`❌ Failed to verify default transporter for tenant ${tenantId}`, err.message);
+          throw new Error(`Default email configuration failed for tenant ${tenantId}: ${err.message}`);
         }
       }
 
@@ -61,15 +65,39 @@ export class EmailService {
       return transporter;
     } catch (err) {
       this.logger.error(`❌ Failed to init transporter for tenant ${tenantId}`, err.message);
-      if (process.env.NODE_ENV === 'production') {
-        throw err;
-      } else {
-        this.logger.warn(`⚠️ Using console fallback for tenant ${tenantId} (dev/test only)`);
-        const fallback = this.createConsoleTransporter();
-        this.transporters.set(tenantId, fallback);
-        return fallback;
+      this.logger.warn(`⚠️ Falling back to default email configuration for tenant ${tenantId}`);
+      
+      try {
+        const defaultConfig = this.getDefaultEmailConfig();
+        const fallbackTransporter = nodemailer.createTransport(defaultConfig);
+        await fallbackTransporter.verify();
+        this.logger.log(`✅ Verified default fallback transporter for tenant ${tenantId}`);
+        this.transporters.set(tenantId, fallbackTransporter);
+        return fallbackTransporter;
+      } catch (fallbackErr) {
+        this.logger.error(`❌ Default email configuration also failed for tenant ${tenantId}`, fallbackErr.message);
+        throw new Error(`Both tenant and default email configurations failed for tenant ${tenantId}`);
       }
     }
+  }
+
+  private getDefaultEmailConfig() {
+    return {
+      host: 'premium292.web-hosting.com',
+      port: 587,
+      secure: false,
+      auth: {
+        user: 'notification@temp.artstraining.co.uk',
+        pass: 'Restricted123!',
+      },
+    };
+  }
+
+  private getDefaultFromConfig() {
+    return {
+      fromEmail: 'notification@temp.artstraining.co.uk',
+      fromName: 'Testing Mail',
+    };
   }
 
   private createConsoleTransporter(): nodemailer.Transporter {
@@ -145,10 +173,20 @@ export class EmailService {
       const transporter = await this.getTransporterForTenant(tenantId);
 
       // Get email config for 'from' field
-      const emailConfig = await this.tenantEmailProvidersService.getDefaultEmailProvider(tenantId);
+      let emailConfig;
+      try {
+        emailConfig = await this.tenantEmailProvidersService.getDefaultEmailProvider(tenantId);
+      } catch (err) {
+        // If no email provider found, emailConfig will be null and we'll use default
+        this.logger.warn(`No email provider for tenant ${tenantId}, using default from config`);
+      }
+
+      const defaultFromConfig = this.getDefaultFromConfig();
+      const fromEmail = emailConfig?.fromEmail || branding?.supportEmail || defaultFromConfig.fromEmail;
+      const fromName = emailConfig?.fromName || branding?.companyName || defaultFromConfig.fromName;
 
       const mailOptions = {
-        from: emailConfig?.fromEmail || branding?.supportEmail || 'noreply@company.com',
+        from: `${fromName} <${fromEmail}>`,
         to,
         subject: finalSubject,
         html,
