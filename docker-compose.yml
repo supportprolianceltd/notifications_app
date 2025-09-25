@@ -3,7 +3,7 @@ services:
   app:
     build: .
     ports:
-      - "3001:3000"
+      - "3001:3001"
     env_file:
       - .env
     depends_on:
@@ -27,7 +27,7 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: notifications
     ports:
-      - "5437:5432"
+      - "5440:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
     healthcheck:

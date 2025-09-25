@@ -11,8 +11,16 @@ function run(cmd) {
 console.log('🔄 Running seeding using script.js...');
 
 async function waitForPostgres() {
-  const dbUrl = process.env.DATABASE_URL || 'postgres://postgres:postgres@localhost:5432/notifications';
-  const client = new Client({ connectionString: dbUrl });
+   const dbUrl = process.env.DATABASE_URL;
+  if (!dbUrl) {
+    throw new Error('DATABASE_URL is not set');
+  }
+  console.log(`🔎 Using database URL: ${dbUrl}`);
+
+    const client = new Client({
+    connectionString: dbUrl,
+  });
+  
   let retries = 20;
   while (retries > 0) {
     try {
