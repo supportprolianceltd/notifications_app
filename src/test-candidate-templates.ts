@@ -185,7 +185,7 @@ async function createNewTemplates() {
 </html>`,
         language: 'en',
         isActive: true,
-        tenantId: 'test-tenant-1',
+        tenantId: 'global',
       },
 
       // Interview Scheduled Template
@@ -412,7 +412,7 @@ async function createNewTemplates() {
 </html>`,
         language: 'en',
         isActive: true,
-        tenantId: 'test-tenant-1',
+        tenantId: 'global',
       },
     ];
 

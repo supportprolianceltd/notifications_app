@@ -17,25 +17,13 @@ export class TemplatesService {
       },
     });
 
-    if (tenantTemplate) {
-      return tenantTemplate;
+    if (!tenantTemplate) {
+      throw new NotFoundException(
+        `Template '${name}' not found for tenant '${tenantId}'`
+      );
     }
 
-    // If not found, try global templates (tenantId === 'global')
-    const globalTemplate = await this.prisma.template.findFirst({
-      where: {
-        tenantId: 'global', // Global templates
-        name,
-        type,
-        isActive: true,
-      },
-    });
-
-    if (!globalTemplate) {
-      throw new NotFoundException(`Template not found: ${name}`);
-    }
-
-    return globalTemplate;
+    return tenantTemplate;
   }
 
   async getTenantBranding(tenantId: string) {

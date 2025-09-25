@@ -1,9 +1,11 @@
-import { Injectable, ConflictException, BadRequestException, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, ConflictException, BadRequestException, InternalServerErrorException, Logger } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class TenantsService {
+    private readonly logger = new Logger(TenantsService.name);
+
     constructor(private prisma: PrismaService) {}
     async getTenant(id: string) {
         return this.prisma.tenant.findUnique({
@@ -58,7 +60,41 @@ export class TenantsService {
             externalId: createTenantDto.externalId,
           },
         });
-        
+
+        this.logger.log(`Tenant created with ID: ${tenant.id}`);
+
+        // 2. Get all global templates
+        const globalTemplates = await tx.template.findMany({
+          where: {
+            tenantId: 'global',
+            isActive: true,
+          },
+        });
+
+        // 3. Duplicate each global template for the new tenant
+        if (globalTemplates.length > 0) {
+          this.logger.log(`Found ${globalTemplates.length} global templates to duplicate for tenant ${tenant.id}`);
+
+          const tenantTemplatesData = globalTemplates.map((template) => ({
+            tenantId: tenant.id,
+            name: template.name,
+            description: template.description,
+            type: template.type,
+            subject: template.subject,
+            body: template.body,
+            language: template.language,
+            isActive: template.isActive,
+          }));
+
+          // Create tenant templates
+          await tx.template.createMany({
+            data: tenantTemplatesData,
+          });
+
+          this.logger.log(`✅ Successfully duplicated ${globalTemplates.length} templates for tenant: ${tenant.id}`);
+        } else {
+          this.logger.log(`No global templates found to duplicate for tenant ${tenant.id}`);
+        }
 
         // Create empty config for tenant
         await tx.tenantConfig.create({
@@ -67,7 +103,7 @@ export class TenantsService {
           },
         });
 
-        console.log(`✅ Successfully created tenant: ${tenant.id} (${tenant.name})`);
+        this.logger.log(`✅ Successfully created tenant: ${tenant.id} (${tenant.name})`);
         return tenant;
       });
     } catch (error) {

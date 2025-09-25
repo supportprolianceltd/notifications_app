@@ -104,13 +104,13 @@ async function testDatabase() {
       },
       {
         tenantConfigId: tenantConfigs[1].id,
-        host: 'smtp.ethereal.email',
+        host: 'smtp.sendgrid.net',
         port: 587,
         secure: false,
-        username: 'ethereal_user_2', // replace with real/test creds
-        password: 'ethereal_pass_2',
-        fromEmail: 'tenant2@example.com',
-        fromName: 'Tenant 2',
+        username: 'apikey', // replace with real/test creds
+        password: process.env.SENDGRID_API_KEY ?? '', // Ensure password is always a string
+        fromEmail: 'noreply@inboxquality.com',
+        fromName: 'Dynocol Studios',
         isDefault: true,
       },
     ];
