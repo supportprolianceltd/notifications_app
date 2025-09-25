@@ -116,6 +116,10 @@ export class EventsService {
           jobIds = await this.handleInterviewScheduled(event);
           break;
 
+        case 'interview.rescheduled':
+          jobIds = await this.handleInterviewRescheduled(event);
+          break;
+
         case 'candidate.shortlisted.gaps':
           jobIds = await this.handleCandidateShortlistedWithGaps(event);
           break;
@@ -529,6 +533,39 @@ export class EventsService {
         });
 
         this.logger.log(`📧 Added interview scheduled email to queue for: ${event.data.email}`);
+        return job.id ? [job.id] : [];
+      }
+
+      private async handleInterviewRescheduled(event: IncomingEventDto): Promise<string[]> {
+        this.logger.log(`Handling interview rescheduled for: ${event.data.email}`);
+        
+        const job = await this.emailQueue.add('interview-rescheduled', {
+          to: event.data.email,
+          subject: 'Interview Rescheduled - New Date and Time',
+          template: 'interview-rescheduled',
+          context: {
+            full_name: event.data.full_name,
+            job_requisition_id: event.data.job_requisition_id,
+            application_id: event.data.application_id,
+            status: event.data.status,
+            interview_start_date_time: event.data.interview_start_date_time,
+            interview_end_date_time: event.data.interview_end_date_time,
+            meeting_mode: event.data.meeting_mode,
+            meeting_link: event.data.meeting_link,
+            interview_address: event.data.interview_address,
+            message: event.data.message,
+            timezone: event.data.timezone,
+            schedule_id: event.data.schedule_id,
+            cancellation_reason: event.data.cancellation_reason,
+            is_cancelled: event.data.status === 'cancelled',
+          },
+          tenantId: event.metadata.tenant_id,
+          userId: event.data.application_id,
+          userName: event.data.full_name,
+          eventType: event.metadata.event_type,
+        });
+
+        this.logger.log(`📧 Added interview rescheduled email to queue for: ${event.data.email}`);
         return job.id ? [job.id] : [];
       }
 
