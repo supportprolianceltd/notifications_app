@@ -53,6 +53,46 @@ async function testAllTemplates() {
         tenantId: 'global',
       },
       {
+        id: 'template-user-account-created',
+        name: 'user-account-created',
+        type: 'email',
+        subject: 'Your Account Has Been Created!',
+        body: `<!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
+          .container { background: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.07); }
+          h2 { color: #007bff; }
+          .info { background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 20px 0; }
+          .btn { background: #007bff; color: #fff; padding: 10px 20px; border-radius: 5px; text-decoration: none; display: inline-block; margin-top: 15px; }
+          .footer { color: #888; font-size: 13px; margin-top: 30px; text-align: center; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <h2>Welcome to {{company_name}}, {{user_name}}!</h2>
+          <p>Your account has been created by an administrator. You can now log in and start using our platform.</p>
+          <div class="info">
+            <p><strong>Email:</strong> {{user_email}}</p>
+            {{#if temp_password}}
+            <p><strong>Temporary Password:</strong> {{temp_password}}</p>
+            {{/if}}
+            <p><strong>Login Link:</strong> <a href="{{login_link}}" class="btn">Log In</a></p>
+          </div>
+          <p>If you have any questions or need help, please contact support.</p>
+          <div class="footer">
+            &copy; {{company_name}} {{year}}
+          </div>
+        </div>
+      </body>
+      </html>`,
+        language: 'en',
+        isActive: true,
+        tenantId: 'global',
+      },
+      {
         id: 'template-login-succeeded',
         name: 'login-succeeded',
         type: 'email',
@@ -845,519 +885,519 @@ async function testAllTemplates() {
       },
 
       // Add this template to your allTemplates array in test-all-templates.ts
-{
-  id: 'template-candidate-shortlisted-gaps',
-  name: 'candidate-shortlisted-gaps',
-  type: 'email',
-  subject: 'Congratulations! You have been shortlisted - Additional Information Required',
-  body: `<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Shortlisted - Employment Gap Information Required</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      line-height: 1.6;
-      color: #333;
-      max-width: 600px;
-      margin: 0 auto;
-      padding: 20px;
-      background-color: #f8f9fa;
-    }
-    .container {
-      background: white;
-      padding: 40px;
-      border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-    .header {
-      text-align: center;
-      margin-bottom: 30px;
-      padding-bottom: 20px;
-      border-bottom: 2px solid #28a745;
-    }
-    .success-icon {
-      font-size: 48px;
-      color: #28a745;
-      margin-bottom: 10px;
-    }
-    h1 {
-      color: #28a745;
-      margin: 0;
-      font-size: 28px;
-    }
-    .details-box {
-      background: #f8f9fa;
-      padding: 20px;
-      border-radius: 8px;
-      margin: 20px 0;
-      border-left: 4px solid #28a745;
-    }
-    .gaps-section {
-      background: #fff3cd;
-      border: 1px solid #ffeaa7;
-      padding: 20px;
-      border-radius: 8px;
-      border-left: 4px solid #f1c40f;
-      margin: 20px 0;
-    }
-    .gap-item {
-      background: white;
-      padding: 15px;
-      margin: 10px 0;
-      border-radius: 6px;
-      border-left: 3px solid #e74c3c;
-    }
-    .detail-row {
-      margin: 10px 0;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-    .detail-label {
-      font-weight: 600;
-      color: #495057;
-      min-width: 140px;
-    }
-    .detail-value {
-      color: #212529;
-      flex: 1;
-      margin-left: 10px;
-    }
-    .score-highlight {
-      background: #28a745;
-      color: white;
-      padding: 5px 15px;
-      border-radius: 20px;
-      font-weight: bold;
-      display: inline-block;
-    }
-    .gaps-highlight {
-      background: #f39c12;
-      color: white;
-      padding: 5px 15px;
-      border-radius: 20px;
-      font-weight: bold;
-      display: inline-block;
-    }
-    .action-required {
-      background: #e7f3ff;
-      padding: 20px;
-      border-radius: 8px;
-      border-left: 4px solid #007bff;
-      margin: 20px 0;
-    }
-    .footer {
-      text-align: center;
-      padding-top: 20px;
-      border-top: 1px solid #dee2e6;
-      color: #6c757d;
-      font-size: 14px;
-    }
-    @media (max-width: 600px) {
-      body { padding: 10px; }
-      .container { padding: 20px; }
-      h1 { font-size: 24px; }
-      .detail-row { flex-direction: column; align-items: flex-start; }
-      .detail-label { min-width: auto; margin-bottom: 5px; }
-      .detail-value { margin-left: 0; }
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <div class="success-icon">🎉</div>
-      <h1>Congratulations!</h1>
-      <p style="margin: 10px 0 0 0; color: #6c757d; font-size: 18px;">You've Been Shortlisted</p>
-    </div>
-
-    <div class="content">
-      <p>Dear <strong>{{full_name}}</strong>,</p>
-      
-      <p>We are excited to inform you that your application has been successfully shortlisted for the position! Your profile shows great potential, and we would like to move forward with your candidacy.</p>
-
-      <div class="details-box">
-        <h3 style="margin-top: 0; color: #28a745;">📋 Application Details</h3>
-        
-        <div class="detail-row">
-          <span class="detail-label">Application ID:</span>
-          <span class="detail-value"><code>{{application_id}}</code></span>
-        </div>
-        
-        <div class="detail-row">
-          <span class="detail-label">Job Requisition:</span>
-          <span class="detail-value"><code>{{job_requisition_id}}</code></span>
-        </div>
-        
-        <div class="detail-row">
-          <span class="detail-label">Current Status:</span>
-          <span class="detail-value"><strong style="color: #28a745; text-transform: capitalize;">{{status}}</strong></span>
-        </div>
-        
-        <div class="detail-row">
-          <span class="detail-label">Screening Score:</span>
-          <span class="detail-value"><span class="score-highlight">{{score}}/100</span></span>
-        </div>
-        
-        <div class="detail-row">
-          <span class="detail-label">Employment Gaps Found:</span>
-          <span class="detail-value"><span class="gaps-highlight">{{gaps_count}} gaps ({{total_gap_duration}})</span></span>
-        </div>
-      </div>
-
-      <div class="gaps-section">
-        <h3 style="margin-top: 0; color: #f39c12;">⚠️ Employment Gaps Identified</h3>
-        <p>During our review of your application, we identified the following employment gaps that we'd like to discuss with you:</p>
-        
-        {{#each employment_gaps}}
-        <div class="gap-item">
-          <div class="detail-row">
-            <span class="detail-label">Gap Period:</span>
-            <span class="detail-value"><strong>{{start_date}} to {{end_date}}</strong></span>
+      {
+        id: 'template-candidate-shortlisted-gaps',
+        name: 'candidate-shortlisted-gaps',
+        type: 'email',
+        subject: 'Congratulations! You have been shortlisted - Additional Information Required',
+        body: `<!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Shortlisted - Employment Gap Information Required</title>
+        <style>
+          body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+          }
+          .container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+          }
+          .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #28a745;
+          }
+          .success-icon {
+            font-size: 48px;
+            color: #28a745;
+            margin-bottom: 10px;
+          }
+          h1 {
+            color: #28a745;
+            margin: 0;
+            font-size: 28px;
+          }
+          .details-box {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #28a745;
+          }
+          .gaps-section {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #f1c40f;
+            margin: 20px 0;
+          }
+          .gap-item {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 6px;
+            border-left: 3px solid #e74c3c;
+          }
+          .detail-row {
+            margin: 10px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+          }
+          .detail-label {
+            font-weight: 600;
+            color: #495057;
+            min-width: 140px;
+          }
+          .detail-value {
+            color: #212529;
+            flex: 1;
+            margin-left: 10px;
+          }
+          .score-highlight {
+            background: #28a745;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            display: inline-block;
+          }
+          .gaps-highlight {
+            background: #f39c12;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            display: inline-block;
+          }
+          .action-required {
+            background: #e7f3ff;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #007bff;
+            margin: 20px 0;
+          }
+          .footer {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #dee2e6;
+            color: #6c757d;
+            font-size: 14px;
+          }
+          @media (max-width: 600px) {
+            body { padding: 10px; }
+            .container { padding: 20px; }
+            h1 { font-size: 24px; }
+            .detail-row { flex-direction: column; align-items: flex-start; }
+            .detail-label { min-width: auto; margin-bottom: 5px; }
+            .detail-value { margin-left: 0; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <div class="success-icon">🎉</div>
+            <h1>Congratulations!</h1>
+            <p style="margin: 10px 0 0 0; color: #6c757d; font-size: 18px;">You've Been Shortlisted</p>
           </div>
-          <div class="detail-row">
-            <span class="detail-label">Duration:</span>
-            <span class="detail-value">{{duration}}</span>
+
+          <div class="content">
+            <p>Dear <strong>{{full_name}}</strong>,</p>
+            
+            <p>We are excited to inform you that your application has been successfully shortlisted for the position! Your profile shows great potential, and we would like to move forward with your candidacy.</p>
+
+            <div class="details-box">
+              <h3 style="margin-top: 0; color: #28a745;">📋 Application Details</h3>
+              
+              <div class="detail-row">
+                <span class="detail-label">Application ID:</span>
+                <span class="detail-value"><code>{{application_id}}</code></span>
+              </div>
+              
+              <div class="detail-row">
+                <span class="detail-label">Job Requisition:</span>
+                <span class="detail-value"><code>{{job_requisition_id}}</code></span>
+              </div>
+              
+              <div class="detail-row">
+                <span class="detail-label">Current Status:</span>
+                <span class="detail-value"><strong style="color: #28a745; text-transform: capitalize;">{{status}}</strong></span>
+              </div>
+              
+              <div class="detail-row">
+                <span class="detail-label">Screening Score:</span>
+                <span class="detail-value"><span class="score-highlight">{{score}}/100</span></span>
+              </div>
+              
+              <div class="detail-row">
+                <span class="detail-label">Employment Gaps Found:</span>
+                <span class="detail-value"><span class="gaps-highlight">{{gaps_count}} gaps ({{total_gap_duration}})</span></span>
+              </div>
+            </div>
+
+            <div class="gaps-section">
+              <h3 style="margin-top: 0; color: #f39c12;">⚠️ Employment Gaps Identified</h3>
+              <p>During our review of your application, we identified the following employment gaps that we'd like to discuss with you:</p>
+              
+              {{#each employment_gaps}}
+              <div class="gap-item">
+                <div class="detail-row">
+                  <span class="detail-label">Gap Period:</span>
+                  <span class="detail-value"><strong>{{start_date}} to {{end_date}}</strong></span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Duration:</span>
+                  <span class="detail-value">{{duration}}</span>
+                </div>
+              </div>
+              {{/each}}
+              
+              <p><strong>Total Gap Duration:</strong> {{total_gap_duration}}</p>
+            </div>
+
+            <div class="action-required">
+              <h3 style="margin-top: 0; color: #007bff;">📝 Next Steps - Action Required</h3>
+              <p>To proceed with your application, we need you to provide brief explanations for the employment gaps identified above. This is a standard part of our screening process.</p>
+              
+              <p><strong>Please prepare to discuss:</strong></p>
+              <ul style="margin: 10px 0; padding-left: 20px;">
+                <li>What you were doing during each gap period</li>
+                <li>Any relevant activities (education, travel, family care, freelancing, etc.)</li>
+                <li>Skills or experiences gained during these periods</li>
+                <li>Any challenges or circumstances that contributed to the gaps</li>
+              </ul>
+              
+              <p><strong>Timeline:</strong> Our HR team will contact you within the next 2-3 business days to schedule a brief discussion about these gaps.</p>
+            </div>
+
+            <p>We understand that career paths can have various twists and turns, and we're committed to hearing your full story. Employment gaps don't disqualify candidates - we simply want to understand your complete professional journey.</p>
+
+            <p>Thank you for your interest in joining our organization, and we look forward to learning more about your experiences!</p>
+
+            <p style="margin-top: 30px;">
+              Best regards,<br>
+              <strong>{{company_name}} Recruitment Team</strong>
+            </p>
+          </div>
+
+          <div class="footer">
+            <p>This is an automated message regarding your job application.</p>
+            <p>If you have any questions about the employment gaps or this process, please contact our HR department.</p>
           </div>
         </div>
-        {{/each}}
-        
-        <p><strong>Total Gap Duration:</strong> {{total_gap_duration}}</p>
-      </div>
+      </body>
+      </html>`,
+        language: 'en',
+        isActive: true,
+        tenantId: 'global',
+      },
+      // Add this template to your allTemplates array in test-all-templates.ts
+      {
+        id: 'template-interview-rescheduled',
+        name: 'interview-rescheduled',
+        type: 'email',
+        subject: 'Interview Rescheduled - New Date and Time',
+        body: `<!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Interview Rescheduled - Important Update</title>
+        <style>
+          body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+          }
+          .container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+          }
+          .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #ffc107;
+          }
+          .update-icon {
+            font-size: 48px;
+            color: #ffc107;
+            margin-bottom: 10px;
+          }
+          .cancelled-header {
+            border-bottom: 2px solid #dc3545;
+          }
+          .cancelled-icon {
+            color: #dc3545;
+          }
+          h1 {
+            color: #ffc107;
+            margin: 0;
+            font-size: 28px;
+          }
+          .cancelled-title {
+            color: #dc3545;
+          }
+          .alert-box {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #ffc107;
+            margin: 20px 0;
+          }
+          .cancelled-alert {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-left: 4px solid #dc3545;
+          }
+          .new-schedule {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin: 25px 0;
+            text-align: center;
+          }
+          .cancelled-schedule {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+          }
+          .schedule-time {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 10px 0;
+          }
+          .meeting-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #007bff;
+          }
+          .meeting-link {
+            background: #007bff;
+            color: white;
+            padding: 12px 25px;
+            text-decoration: none;
+            border-radius: 5px;
+            display: inline-block;
+            margin: 10px 0;
+            font-weight: bold;
+          }
+          .meeting-link:hover {
+            background: #0056b3;
+            color: white;
+          }
+          .reason-box {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+            border-left: 3px solid #6c757d;
+          }
+          .important-note {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 3px solid #17a2b8;
+            margin: 20px 0;
+          }
+          .footer {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #dee2e6;
+            color: #6c757d;
+            font-size: 14px;
+          }
+          .detail-row {
+            margin: 10px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+          }
+          .detail-label {
+            font-weight: 600;
+            color: #495057;
+            min-width: 120px;
+          }
+          .detail-value {
+            color: #212529;
+            flex: 1;
+            margin-left: 10px;
+          }
+          @media (max-width: 600px) {
+            body { padding: 10px; }
+            .container { padding: 20px; }
+            h1 { font-size: 24px; }
+            .schedule-time { font-size: 20px; }
+            .detail-row { flex-direction: column; align-items: flex-start; }
+            .detail-label { min-width: auto; margin-bottom: 5px; }
+            .detail-value { margin-left: 0; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header {{#if is_cancelled}}cancelled-header{{/if}}">
+            <div class="update-icon {{#if is_cancelled}}cancelled-icon{{/if}}">
+              {{#if is_cancelled}}❌{{else}}🔄{{/if}}
+            </div>
+            <h1 {{#if is_cancelled}}class="cancelled-title"{{/if}}>
+              {{#if is_cancelled}}Interview Cancelled{{else}}Interview Rescheduled{{/if}}
+            </h1>
+            <p style="margin: 10px 0 0 0; color: #6c757d; font-size: 18px;">
+              {{#if is_cancelled}}We apologize for the inconvenience{{else}}Please note the new date and time{{/if}}
+            </p>
+          </div>
 
-      <div class="action-required">
-        <h3 style="margin-top: 0; color: #007bff;">📝 Next Steps - Action Required</h3>
-        <p>To proceed with your application, we need you to provide brief explanations for the employment gaps identified above. This is a standard part of our screening process.</p>
-        
-        <p><strong>Please prepare to discuss:</strong></p>
-        <ul style="margin: 10px 0; padding-left: 20px;">
-          <li>What you were doing during each gap period</li>
-          <li>Any relevant activities (education, travel, family care, freelancing, etc.)</li>
-          <li>Skills or experiences gained during these periods</li>
-          <li>Any challenges or circumstances that contributed to the gaps</li>
-        </ul>
-        
-        <p><strong>Timeline:</strong> Our HR team will contact you within the next 2-3 business days to schedule a brief discussion about these gaps.</p>
-      </div>
+          <div class="content">
+            <p>Dear <strong>{{full_name}}</strong>,</p>
+            
+            {{#if is_cancelled}}
+            <p>We regret to inform you that your scheduled interview has been cancelled. We sincerely apologize for any inconvenience this may cause.</p>
+            {{else}}
+            <p>We need to reschedule your interview due to unforeseen circumstances. Please find the new interview details below:</p>
+            {{/if}}
 
-      <p>We understand that career paths can have various twists and turns, and we're committed to hearing your full story. Employment gaps don't disqualify candidates - we simply want to understand your complete professional journey.</p>
+            {{#unless is_cancelled}}
+            <div class="new-schedule">
+              <h3 style="margin-top: 0;">📅 New Interview Schedule</h3>
+              <div class="schedule-time">{{interview_start_date_time}}</div>
+              <p>Duration: {{interview_start_date_time}} - {{interview_end_date_time}}</p>
+              <p><strong>Timezone:</strong> {{timezone}}</p>
+            </div>
+            {{/unless}}
 
-      <p>Thank you for your interest in joining our organization, and we look forward to learning more about your experiences!</p>
+            {{#if is_cancelled}}
+            <div class="new-schedule cancelled-schedule">
+              <h3 style="margin-top: 0;">❌ Interview Cancelled</h3>
+              <p style="font-size: 18px; margin: 0;">We will contact you shortly to reschedule</p>
+            </div>
+            {{/if}}
 
-      <p style="margin-top: 30px;">
-        Best regards,<br>
-        <strong>{{company_name}} Recruitment Team</strong>
-      </p>
-    </div>
+            <div class="meeting-info">
+              <h4 style="margin-top: 0; color: #007bff;">📋 Interview Details</h4>
+              
+              <div class="detail-row">
+                <span class="detail-label">Application ID:</span>
+                <span class="detail-value"><code>{{application_id}}</code></span>
+              </div>
+              
+              <div class="detail-row">
+                <span class="detail-label">Schedule ID:</span>
+                <span class="detail-value"><code>{{schedule_id}}</code></span>
+              </div>
+              
+              <div class="detail-row">
+                <span class="detail-label">Job Requisition:</span>
+                <span class="detail-value"><code>{{job_requisition_id}}</code></span>
+              </div>
+              
+              <div class="detail-row">
+                <span class="detail-label">Status:</span>
+                <span class="detail-value"><strong style="text-transform: capitalize; {{#if is_cancelled}}color: #dc3545;{{else}}color: #ffc107;{{/if}}">{{status}}</strong></span>
+              </div>
+              
+              {{#unless is_cancelled}}
+              <div class="detail-row">
+                <span class="detail-label">Meeting Mode:</span>
+                <span class="detail-value" style="text-transform: capitalize;"><strong>{{meeting_mode}}</strong></span>
+              </div>
 
-    <div class="footer">
-      <p>This is an automated message regarding your job application.</p>
-      <p>If you have any questions about the employment gaps or this process, please contact our HR department.</p>
-    </div>
-  </div>
-</body>
-</html>`,
-  language: 'en',
-  isActive: true,
-  tenantId: 'global',
-},
-// Add this template to your allTemplates array in test-all-templates.ts
-{
-  id: 'template-interview-rescheduled',
-  name: 'interview-rescheduled',
-  type: 'email',
-  subject: 'Interview Rescheduled - New Date and Time',
-  body: `<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Interview Rescheduled - Important Update</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      line-height: 1.6;
-      color: #333;
-      max-width: 600px;
-      margin: 0 auto;
-      padding: 20px;
-      background-color: #f8f9fa;
-    }
-    .container {
-      background: white;
-      padding: 40px;
-      border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-    .header {
-      text-align: center;
-      margin-bottom: 30px;
-      padding-bottom: 20px;
-      border-bottom: 2px solid #ffc107;
-    }
-    .update-icon {
-      font-size: 48px;
-      color: #ffc107;
-      margin-bottom: 10px;
-    }
-    .cancelled-header {
-      border-bottom: 2px solid #dc3545;
-    }
-    .cancelled-icon {
-      color: #dc3545;
-    }
-    h1 {
-      color: #ffc107;
-      margin: 0;
-      font-size: 28px;
-    }
-    .cancelled-title {
-      color: #dc3545;
-    }
-    .alert-box {
-      background: #fff3cd;
-      border: 1px solid #ffeaa7;
-      padding: 20px;
-      border-radius: 8px;
-      border-left: 4px solid #ffc107;
-      margin: 20px 0;
-    }
-    .cancelled-alert {
-      background: #f8d7da;
-      border: 1px solid #f5c6cb;
-      border-left: 4px solid #dc3545;
-    }
-    .new-schedule {
-      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-      color: white;
-      padding: 25px;
-      border-radius: 10px;
-      margin: 25px 0;
-      text-align: center;
-    }
-    .cancelled-schedule {
-      background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
-    }
-    .schedule-time {
-      font-size: 24px;
-      font-weight: bold;
-      margin: 10px 0;
-    }
-    .meeting-info {
-      background: #f8f9fa;
-      padding: 20px;
-      border-radius: 8px;
-      margin: 20px 0;
-      border-left: 4px solid #007bff;
-    }
-    .meeting-link {
-      background: #007bff;
-      color: white;
-      padding: 12px 25px;
-      text-decoration: none;
-      border-radius: 5px;
-      display: inline-block;
-      margin: 10px 0;
-      font-weight: bold;
-    }
-    .meeting-link:hover {
-      background: #0056b3;
-      color: white;
-    }
-    .reason-box {
-      background: #e9ecef;
-      padding: 15px;
-      border-radius: 6px;
-      margin: 15px 0;
-      border-left: 3px solid #6c757d;
-    }
-    .important-note {
-      background: #d1ecf1;
-      border: 1px solid #bee5eb;
-      padding: 15px;
-      border-radius: 5px;
-      border-left: 3px solid #17a2b8;
-      margin: 20px 0;
-    }
-    .footer {
-      text-align: center;
-      padding-top: 20px;
-      border-top: 1px solid #dee2e6;
-      color: #6c757d;
-      font-size: 14px;
-    }
-    .detail-row {
-      margin: 10px 0;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-    .detail-label {
-      font-weight: 600;
-      color: #495057;
-      min-width: 120px;
-    }
-    .detail-value {
-      color: #212529;
-      flex: 1;
-      margin-left: 10px;
-    }
-    @media (max-width: 600px) {
-      body { padding: 10px; }
-      .container { padding: 20px; }
-      h1 { font-size: 24px; }
-      .schedule-time { font-size: 20px; }
-      .detail-row { flex-direction: column; align-items: flex-start; }
-      .detail-label { min-width: auto; margin-bottom: 5px; }
-      .detail-value { margin-left: 0; }
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header {{#if is_cancelled}}cancelled-header{{/if}}">
-      <div class="update-icon {{#if is_cancelled}}cancelled-icon{{/if}}">
-        {{#if is_cancelled}}❌{{else}}🔄{{/if}}
-      </div>
-      <h1 {{#if is_cancelled}}class="cancelled-title"{{/if}}>
-        {{#if is_cancelled}}Interview Cancelled{{else}}Interview Rescheduled{{/if}}
-      </h1>
-      <p style="margin: 10px 0 0 0; color: #6c757d; font-size: 18px;">
-        {{#if is_cancelled}}We apologize for the inconvenience{{else}}Please note the new date and time{{/if}}
-      </p>
-    </div>
+              {{#if meeting_link}}
+              <div style="text-align: center; margin: 20px 0;">
+                <p><strong>Join the interview:</strong></p>
+                <a href="{{meeting_link}}" class="meeting-link">Join Virtual Meeting</a>
+              </div>
+              {{/if}}
 
-    <div class="content">
-      <p>Dear <strong>{{full_name}}</strong>,</p>
-      
-      {{#if is_cancelled}}
-      <p>We regret to inform you that your scheduled interview has been cancelled. We sincerely apologize for any inconvenience this may cause.</p>
-      {{else}}
-      <p>We need to reschedule your interview due to unforeseen circumstances. Please find the new interview details below:</p>
-      {{/if}}
+              {{#if interview_address}}
+              <div class="detail-row">
+                <span class="detail-label">Address:</span>
+                <span class="detail-value">{{interview_address}}</span>
+              </div>
+              {{/if}}
+              {{/unless}}
+            </div>
 
-      {{#unless is_cancelled}}
-      <div class="new-schedule">
-        <h3 style="margin-top: 0;">📅 New Interview Schedule</h3>
-        <div class="schedule-time">{{interview_start_date_time}}</div>
-        <p>Duration: {{interview_start_date_time}} - {{interview_end_date_time}}</p>
-        <p><strong>Timezone:</strong> {{timezone}}</p>
-      </div>
-      {{/unless}}
+            {{#if cancellation_reason}}
+            <div class="reason-box">
+              <h4 style="margin-top: 0; color: #6c757d;">📝 Reason for {{#if is_cancelled}}Cancellation{{else}}Reschedule{{/if}}</h4>
+              <p style="margin-bottom: 0;">{{cancellation_reason}}</p>
+            </div>
+            {{/if}}
 
-      {{#if is_cancelled}}
-      <div class="new-schedule cancelled-schedule">
-        <h3 style="margin-top: 0;">❌ Interview Cancelled</h3>
-        <p style="font-size: 18px; margin: 0;">We will contact you shortly to reschedule</p>
-      </div>
-      {{/if}}
+            {{#if message}}
+            <div class="alert-box {{#if is_cancelled}}cancelled-alert{{/if}}">
+              <h4 style="margin-top: 0; color: {{#if is_cancelled}}#721c24{{else}}#856404{{/if}};">💬 Additional Message</h4>
+              <p style="margin-bottom: 0;">{{message}}</p>
+            </div>
+            {{/if}}
 
-      <div class="meeting-info">
-        <h4 style="margin-top: 0; color: #007bff;">📋 Interview Details</h4>
-        
-        <div class="detail-row">
-          <span class="detail-label">Application ID:</span>
-          <span class="detail-value"><code>{{application_id}}</code></span>
+            {{#unless is_cancelled}}
+            <div class="important-note">
+              <h4 style="margin-top: 0; color: #0c5460;">⚠️ Important Reminders</h4>
+              <ul style="margin-bottom: 0; padding-left: 20px;">
+                <li>Please confirm your attendance for the new time slot</li>
+                <li>Update your calendar with the new interview time</li>
+                <li>Join the meeting 5-10 minutes early if virtual, or arrive 15 minutes early if in-person</li>
+                <li>Contact us immediately if the new time doesn't work for you</li>
+              </ul>
+            </div>
+            {{/unless}}
+
+            {{#if is_cancelled}}
+            <div class="important-note">
+              <h4 style="margin-top: 0; color: #0c5460;">📞 Next Steps</h4>
+              <ul style="margin-bottom: 0; padding-left: 20px;">
+                <li>Our HR team will contact you within 24-48 hours to reschedule</li>
+                <li>Please reply to this email if you have any urgent questions</li>
+                <li>We remain interested in your candidacy and apologize for the inconvenience</li>
+              </ul>
+            </div>
+            {{/if}}
+
+            <p>{{#if is_cancelled}}We sincerely apologize for this inconvenience and appreciate your understanding. We remain committed to moving forward with your application.{{else}}We apologize for any inconvenience caused by this schedule change and appreciate your flexibility.{{/if}}</p>
+
+            <p style="margin-top: 30px;">
+              Best regards,<br>
+              <strong>{{company_name}} HR Team</strong>
+            </p>
+          </div>
+
+          <div class="footer">
+            <p>This is an automated interview {{#if is_cancelled}}cancellation{{else}}rescheduling{{/if}} notification.</p>
+            <p>Please contact HR if you have any questions or concerns.</p>
+          </div>
         </div>
-        
-        <div class="detail-row">
-          <span class="detail-label">Schedule ID:</span>
-          <span class="detail-value"><code>{{schedule_id}}</code></span>
-        </div>
-        
-        <div class="detail-row">
-          <span class="detail-label">Job Requisition:</span>
-          <span class="detail-value"><code>{{job_requisition_id}}</code></span>
-        </div>
-        
-        <div class="detail-row">
-          <span class="detail-label">Status:</span>
-          <span class="detail-value"><strong style="text-transform: capitalize; {{#if is_cancelled}}color: #dc3545;{{else}}color: #ffc107;{{/if}}">{{status}}</strong></span>
-        </div>
-        
-        {{#unless is_cancelled}}
-        <div class="detail-row">
-          <span class="detail-label">Meeting Mode:</span>
-          <span class="detail-value" style="text-transform: capitalize;"><strong>{{meeting_mode}}</strong></span>
-        </div>
-
-        {{#if meeting_link}}
-        <div style="text-align: center; margin: 20px 0;">
-          <p><strong>Join the interview:</strong></p>
-          <a href="{{meeting_link}}" class="meeting-link">Join Virtual Meeting</a>
-        </div>
-        {{/if}}
-
-        {{#if interview_address}}
-        <div class="detail-row">
-          <span class="detail-label">Address:</span>
-          <span class="detail-value">{{interview_address}}</span>
-        </div>
-        {{/if}}
-        {{/unless}}
-      </div>
-
-      {{#if cancellation_reason}}
-      <div class="reason-box">
-        <h4 style="margin-top: 0; color: #6c757d;">📝 Reason for {{#if is_cancelled}}Cancellation{{else}}Reschedule{{/if}}</h4>
-        <p style="margin-bottom: 0;">{{cancellation_reason}}</p>
-      </div>
-      {{/if}}
-
-      {{#if message}}
-      <div class="alert-box {{#if is_cancelled}}cancelled-alert{{/if}}">
-        <h4 style="margin-top: 0; color: {{#if is_cancelled}}#721c24{{else}}#856404{{/if}};">💬 Additional Message</h4>
-        <p style="margin-bottom: 0;">{{message}}</p>
-      </div>
-      {{/if}}
-
-      {{#unless is_cancelled}}
-      <div class="important-note">
-        <h4 style="margin-top: 0; color: #0c5460;">⚠️ Important Reminders</h4>
-        <ul style="margin-bottom: 0; padding-left: 20px;">
-          <li>Please confirm your attendance for the new time slot</li>
-          <li>Update your calendar with the new interview time</li>
-          <li>Join the meeting 5-10 minutes early if virtual, or arrive 15 minutes early if in-person</li>
-          <li>Contact us immediately if the new time doesn't work for you</li>
-        </ul>
-      </div>
-      {{/unless}}
-
-      {{#if is_cancelled}}
-      <div class="important-note">
-        <h4 style="margin-top: 0; color: #0c5460;">📞 Next Steps</h4>
-        <ul style="margin-bottom: 0; padding-left: 20px;">
-          <li>Our HR team will contact you within 24-48 hours to reschedule</li>
-          <li>Please reply to this email if you have any urgent questions</li>
-          <li>We remain interested in your candidacy and apologize for the inconvenience</li>
-        </ul>
-      </div>
-      {{/if}}
-
-      <p>{{#if is_cancelled}}We sincerely apologize for this inconvenience and appreciate your understanding. We remain committed to moving forward with your application.{{else}}We apologize for any inconvenience caused by this schedule change and appreciate your flexibility.{{/if}}</p>
-
-      <p style="margin-top: 30px;">
-        Best regards,<br>
-        <strong>{{company_name}} HR Team</strong>
-      </p>
-    </div>
-
-    <div class="footer">
-      <p>This is an automated interview {{#if is_cancelled}}cancellation{{else}}rescheduling{{/if}} notification.</p>
-      <p>Please contact HR if you have any questions or concerns.</p>
-    </div>
-  </div>
-</body>
-</html>`,
-  language: 'en',
-  isActive: true,
-  tenantId: 'global',
-},
+      </body>
+      </html>`,
+        language: 'en',
+        isActive: true,
+        tenantId: 'global',
+      },
     ];
 
     // Create all templates
@@ -1429,71 +1469,71 @@ async function testAllTemplates() {
         event_type: 'user.email.verified',
         data: { user_id: 'user-test-001', user_email: 'tegaokorare91@gmail.com', user_name: 'Test User' }
       },
-      {
-        event_type: 'user.login.succeeded', 
-        data: { user_id: 'user-test-001', user_email: 'tegaokorare91@gmail.com', ip_address: '192.168.1.1', user_agent: 'Chrome', timestamp: new Date().toISOString() }
-      },
-      {
-        event_type: 'auth.2fa.code.requested',
-        data: { user_id: 'user-test-001', user_email: 'tegaokorare91@gmail.com', '2fa_code': '123456', '2fa_method': 'email', ip_address: '192.168.1.1', user_agent: 'Chrome', expires_in_seconds: 300 }
-      },
+      // {
+      //   event_type: 'user.login.succeeded', 
+      //   data: { user_id: 'user-test-001', user_email: 'tegaokorare91@gmail.com', ip_address: '192.168.1.1', user_agent: 'Chrome', timestamp: new Date().toISOString() }
+      // },
+      // {
+      //   event_type: 'auth.2fa.code.requested',
+      //   data: { user_id: 'user-test-001', user_email: 'tegaokorare91@gmail.com', '2fa_code': '123456', '2fa_method': 'email', ip_address: '192.168.1.1', user_agent: 'Chrome', expires_in_seconds: 300 }
+      // },
        // Add recruitment template tests
-      {
-        event_type: 'candidate.shortlisted',
-        data: {
-          application_id: 'app-test-12345',
-          full_name: 'John Smith',
-          email: 'tegaokorare91@gmail.com',
-          job_requisition_id: 'job-67890',
-          status: 'shortlisted',
-          score: 85.5,
-          screening_status: 'processed',
-          document_type: 'resume'
-        }
-      },
-      {
-        event_type: 'interview.scheduled',
-        data: {
-          application_id: 'app-test-67890',
-          full_name: 'Jane Doe',
-          email: 'tegaokorare91@gmail.com',
-          job_requisition_id: 'job-67890',
-          status: 'scheduled',
-          interview_start_date_time: '2025-09-19T10:00:00+01:00',
-          interview_end_date_time: '2025-09-19T11:00:00+01:00',
-          meeting_mode: 'virtual',
-          meeting_link: 'https://zoom.us/j/123456789',
-          message: 'Please join 5 minutes early',
-          timezone: 'Africa/Lagos',
-          schedule_id: 'schedule-test-999'
-        }
-      },
+      // {
+      //   event_type: 'candidate.shortlisted',
+      //   data: {
+      //     application_id: 'app-test-12345',
+      //     full_name: 'John Smith',
+      //     email: 'tegaokorare91@gmail.com',
+      //     job_requisition_id: 'job-67890',
+      //     status: 'shortlisted',
+      //     score: 85.5,
+      //     screening_status: 'processed',
+      //     document_type: 'resume'
+      //   }
+      // },
+      // {
+      //   event_type: 'interview.scheduled',
+      //   data: {
+      //     application_id: 'app-test-67890',
+      //     full_name: 'Jane Doe',
+      //     email: 'tegaokorare91@gmail.com',
+      //     job_requisition_id: 'job-67890',
+      //     status: 'scheduled',
+      //     interview_start_date_time: '2025-09-19T10:00:00+01:00',
+      //     interview_end_date_time: '2025-09-19T11:00:00+01:00',
+      //     meeting_mode: 'virtual',
+      //     meeting_link: 'https://zoom.us/j/123456789',
+      //     message: 'Please join 5 minutes early',
+      //     timezone: 'Africa/Lagos',
+      //     schedule_id: 'schedule-test-999'
+      //   }
+      // },
       // Add this test event to your testEvents array in test-all-templates.ts
-      {
-        event_type: 'candidate.shortlisted.gaps',
-        data: {
-          application_id: 'app-test-33333',
-          full_name: 'Sarah Johnson',
-          email: 'tegaokorare91@gmail.com',
-          job_requisition_id: 'job-67890',
-          status: 'shortlisted',
-          score: 78.5,
-          screening_status: 'processed',
-          employment_gaps: [
-            {
-              start_date: '2020-03-01',
-              end_date: '2020-12-31',
-              duration: '10 months'
-            },
-            {
-              start_date: '2022-06-01',
-              end_date: '2023-01-31',
-              duration: '8 months'
-            }
-          ],
-          document_type: 'resume'
-        }
-      },
+      // {
+      //   event_type: 'candidate.shortlisted.gaps',
+      //   data: {
+      //     application_id: 'app-test-33333',
+      //     full_name: 'Sarah Johnson',
+      //     email: 'tegaokorare91@gmail.com',
+      //     job_requisition_id: 'job-67890',
+      //     status: 'shortlisted',
+      //     score: 78.5,
+      //     screening_status: 'processed',
+      //     employment_gaps: [
+      //       {
+      //         start_date: '2020-03-01',
+      //         end_date: '2020-12-31',
+      //         duration: '10 months'
+      //       },
+      //       {
+      //         start_date: '2022-06-01',
+      //         end_date: '2023-01-31',
+      //         duration: '8 months'
+      //       }
+      //     ],
+      //     document_type: 'resume'
+      //   }
+      // },
 ];
 
     for (const testEvent of testEvents) {

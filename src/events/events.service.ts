@@ -44,6 +44,10 @@ export class EventsService {
           jobIds = await this.handleUserRegistration(event);
           break;
 
+        case 'user.account.created':
+          jobIds = await this.handleUserAccountCreated(event);
+          break;
+
         case 'user.email.verified':
           jobIds = await this.handleUserEmailVerified(event);
           break;
@@ -154,6 +158,23 @@ export class EventsService {
     });
 
     this.logger.log(`📧 Added welcome email to queue for: ${event.data.user_email}`);
+    return job.id ? [job.id] : [];
+  }
+
+  private async handleUserAccountCreated(event: IncomingEventDto): Promise<string[]> {
+    const job = await this.emailQueue.add('user-account-created', {
+      to: event.data.user_email,
+      subject: 'Your Account Has Been Created',
+      template: 'user-account-created',
+      context: {
+        user_name: event.data.user_name,
+        company_name: event.data.company_name,
+        temp_password: event.data.temp_password, // if applicable
+        login_link: event.data.login_link,
+      },
+      tenantId: event.metadata.tenant_id,
+      eventType: event.metadata.event_type,
+    });
     return job.id ? [job.id] : [];
   }
 
