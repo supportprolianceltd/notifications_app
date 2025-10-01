@@ -60,6 +60,13 @@ export class NotificationsService {
     });
   }
 
+  async getNotificationLogsForTenant(tenantId: string) {
+    return this.prisma.notification.findMany({
+      where: { tenantId },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
   async updateNotificationStatus(id: string, status: string, providerResponse?: any, externalId?: string) {
     return this.prisma.notification.update({
       where: { id },
