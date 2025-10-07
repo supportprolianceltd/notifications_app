@@ -6,8 +6,6 @@ export class TenantEmailProvidersService {
   constructor(private prisma: PrismaService) {}
 
   async createEmailProvider(tenantId: string, providerData: any) {
-
-
     // Get or create tenant config
     let tenantConfig = await this.prisma.tenantConfig.findUnique({
       where: { tenantId },
@@ -29,19 +27,25 @@ export class TenantEmailProvidersService {
       throw new NotFoundException(`Tenant config could not be created for tenant: ${tenantId}`);
     }
 
-
-    // If setting as default, unset any existing default
-    if (providerData.isDefault) {
-      await this.prisma.tenantEmailProvider.updateMany({
-        where: { tenantConfigId: tenantConfig.id, isDefault: true },
-        data: { isDefault: false }
+    // Check if tenant already has an email provider
+    if (tenantConfig.emailProviders.length > 0) {
+      // Update existing email provider instead of creating a new one
+      const existingProvider = tenantConfig.emailProviders[0];
+      return this.prisma.tenantEmailProvider.update({
+        where: { id: existingProvider.id },
+        data: {
+          ...providerData,
+          isDefault: true // Ensure it remains the default (and only) provider
+        }
       });
     }
 
+    // Create new email provider (first one for this tenant)
     return this.prisma.tenantEmailProvider.create({
       data: {
         tenantConfigId: tenantConfig.id,
-        ...providerData
+        ...providerData,
+        isDefault: true // First provider is always default
       }
     });
   }
@@ -50,9 +54,7 @@ export class TenantEmailProvidersService {
     const tenantConfig = await this.prisma.tenantConfig.findUnique({
       where: { tenantId },
       include: {
-        emailProviders: {
-          orderBy: { isDefault: 'desc' }
-        }
+        emailProviders: true
       }
     });
 
@@ -60,6 +62,7 @@ export class TenantEmailProvidersService {
       throw new NotFoundException(`Tenant config not found for tenant: ${tenantId}`);
     }
 
+    // Return the single email provider (or empty array if none exists)
     return tenantConfig.emailProviders;
   }
 
@@ -67,10 +70,7 @@ export class TenantEmailProvidersService {
     const tenantConfig = await this.prisma.tenantConfig.findUnique({
       where: { tenantId },
       include: {
-        emailProviders: {
-          where: { isDefault: true },
-          take: 1
-        }
+        emailProviders: true
       }
     });
 
@@ -81,10 +81,7 @@ export class TenantEmailProvidersService {
       const fallbackConfig = await this.prisma.tenantConfig.findUnique({
         where: { tenantId: 'test-tenant-1' },
         include: {
-          emailProviders: {
-            where: { isDefault: true },
-            take: 1
-          }
+          emailProviders: true
         }
       });
 
@@ -97,31 +94,18 @@ export class TenantEmailProvidersService {
       return fallbackConfig.emailProviders[0];
     }
 
+    // Return the single email provider for this tenant
     return tenantConfig.emailProviders[0];
   }
 
   async updateEmailProvider(providerId: string, updateData: any) {
-    // If setting as default, unset any existing default first
-    if (updateData.isDefault) {
-      const provider = await this.prisma.tenantEmailProvider.findUnique({
-        where: { id: providerId }
-      });
-
-      if (provider) {
-        await this.prisma.tenantEmailProvider.updateMany({
-          where: { 
-            tenantConfigId: provider.tenantConfigId, 
-            isDefault: true,
-            id: { not: providerId }
-          },
-          data: { isDefault: false }
-        });
-      }
-    }
-
+    // Since each tenant has only one email provider, we don't need to manage multiple defaults
     return this.prisma.tenantEmailProvider.update({
       where: { id: providerId },
-      data: updateData
+      data: {
+        ...updateData,
+        isDefault: true // Always keep it as default since it's the only one
+      }
     });
   }
 

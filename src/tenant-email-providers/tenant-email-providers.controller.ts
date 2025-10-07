@@ -7,7 +7,7 @@ export class TenantEmailProvidersController {
     private readonly emailProvidersService: TenantEmailProvidersService,
   ) {}
     @Post()
-    async createEmailProvider(
+    async createOrUpdateEmailProvider(
         @Param('tenantId') tenantId: string,
         @Body() providerData: any
     ) {
@@ -15,8 +15,10 @@ export class TenantEmailProvidersController {
     }
 
     @Get()
-    async getEmailProviders(@Param('tenantId') tenantId: string) {
-        return this.emailProvidersService.getEmailProviders(tenantId);
+    async getEmailProvider(@Param('tenantId') tenantId: string) {
+        const providers = await this.emailProvidersService.getEmailProviders(tenantId);
+        // Return the single provider or null if none exists
+        return providers.length > 0 ? providers[0] : null;
     }
 
     @Get('default')
