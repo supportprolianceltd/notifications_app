@@ -27,8 +27,8 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Install Postgres client for pg_isready
-RUN apk add --no-cache postgresql-client
+# Install Postgres client for pg_isready (Alpine package 'postgresql' provides pg_isready)
+RUN apk add --no-cache postgresql
 
 # Copy package.json and install only production deps
 COPY package*.json ./

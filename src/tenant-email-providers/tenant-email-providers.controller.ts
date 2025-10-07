@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
 import { TenantEmailProvidersService } from './tenant-email-providers.service';
 
 @Controller('tenants/:tenantId/email-providers')
@@ -7,7 +7,7 @@ export class TenantEmailProvidersController {
     private readonly emailProvidersService: TenantEmailProvidersService,
   ) {}
     @Post()
-    async createEmailProvider(
+    async createOrUpdateEmailProvider(
         @Param('tenantId') tenantId: string,
         @Body() providerData: any
     ) {
@@ -15,8 +15,10 @@ export class TenantEmailProvidersController {
     }
 
     @Get()
-    async getEmailProviders(@Param('tenantId') tenantId: string) {
-        return this.emailProvidersService.getEmailProviders(tenantId);
+    async getEmailProvider(@Param('tenantId') tenantId: string) {
+        const providers = await this.emailProvidersService.getEmailProviders(tenantId);
+        // Return the single provider or null if none exists
+        return providers.length > 0 ? providers[0] : null;
     }
 
     @Get('default')
@@ -26,7 +28,7 @@ export class TenantEmailProvidersController {
 
     @Put(':providerId')
     async updateEmailProvider(
-        @Param('providerId', ParseUUIDPipe) providerId: string,
+        @Param('providerId') providerId: string,
         @Body() updateData: any
     ) {
         return this.emailProvidersService.updateEmailProvider(providerId, updateData);
@@ -34,7 +36,7 @@ export class TenantEmailProvidersController {
 
     @Delete(':providerId')
     async deleteEmailProvider(
-        @Param('providerId', ParseUUIDPipe) providerId: string
+        @Param('providerId') providerId: string
     ) {
         return this.emailProvidersService.deleteEmailProvider(providerId);
     }
