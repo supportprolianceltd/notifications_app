@@ -666,31 +666,39 @@ async function testAllTemplates() {
       // Interview Scheduled Template
       {
         id: 'template-interview-scheduled',
-          name: 'interview-scheduled',
-          type: 'email',
-          subject: 'Interview Invitation - {{job_requisition_title}}',
-          body: `Hello {{full_name}},
+        name: 'interview-scheduled',
+        type: 'email',
+        subject: 'Interview Invitation - {{job_requisition_title}}',
+        body: `Hello {{full_name}},
 
-  We’re pleased to invite you to an interview for the {{job_requisition_title}} role at {{company_name}}.
-  Please let us know your availability so we can confirm a convenient time.
+We’re pleased to invite you to an interview for the {{job_requisition_title}} role at {{company_name}}.
 
-  Best regards,
-  Hiring Team
+Interview details:
+- Date / Start: {{interview_start_date_time}}
+- Date / End:   {{interview_end_date_time}}
+- Timezone:     {{timezone}}
+- Job Requisition: {{job_requisition_id}}
+- Application ID:  {{application_id}}
+- Schedule ID:     {{schedule_id}}
+- Recipient:       {{recipient_email}}
 
-  Please check your application dashboard for further details: {{dashboard_url}}
+Please check your application dashboard for further details: {{dashboard_url}}
 
-  {{#if has_meeting_link}}
-  Meeting link: {{meeting_link}}
-  {{/if}}
+{{#if has_meeting_link}}
+Meeting link: {{meeting_link}}
+{{/if}}
 
-  {{#if has_address}}
-  Address: {{interview_address}}
-  {{/if}}
-  `,
-          language: 'en',
-          isActive: true,
-          tenantId: 'global',
-        },
+{{#if has_address}}
+Address: {{interview_address}}
+{{/if}}
+
+Best regards,
+Hiring Team
+`,
+        language: 'en',
+        isActive: true,
+        tenantId: 'global',
+      },
 
       // Add this template to your allTemplates array in test-all-templates.ts
       {
