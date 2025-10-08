@@ -1,4 +1,7 @@
 // src/test-all-templates.ts
+// 🚨 DEVELOPMENT MODE: This script will UPDATE existing tenant templates
+// 🚨 For PRODUCTION: Change upsert update to {} and remove tenant template updates
+
 import { PrismaClient } from '@prisma/client';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Queue } from 'bullmq';
@@ -6,6 +9,7 @@ import { AppConfigService } from './config/config.service';
 
 async function testAllTemplates() {
   console.log('🚀 Creating ALL Missing Templates and Testing Events...\n');
+  console.log('🚨 DEVELOPMENT MODE: Will update existing tenant templates\n');
   
   const prisma = new PrismaClient();
 
@@ -1270,57 +1274,76 @@ Hiring Team
     for (const templateData of allTemplates) {
       const template = await prisma.template.upsert({
         where: { id: templateData.id },
-        update: {},
+        update: {
+          name: templateData.name,
+          description: templateData.description,
+          type: templateData.type,
+          subject: templateData.subject,
+          body: templateData.body,
+          language: templateData.language,
+          isActive: templateData.isActive,
+        },
         create: templateData,
       });
-      console.log(`   ✅ Created template: ${template.name}`);
+      console.log(`   ✅ Created/Updated global template: ${template.name}`);
     }
 
     console.log(`\n🎉 Created ${allTemplates.length} templates successfully!`);
 
-    console.log('\n🔄 Duplicating new templates for existing tenants...');
+    console.log('\n🔄 Updating/Creating tenant templates from global templates...');
 
     // Get all non-global tenants
     const existingTenants = await prisma.tenant.findMany({
       where: { id: { not: 'global' } },
     });
 
+    // Get all current global templates
+    const allGlobalTemplates = await prisma.template.findMany({
+      where: { tenantId: 'global', isActive: true },
+    });
+
     for (const tenant of existingTenants) {
-      // Get templates this tenant doesn't have yet
-      const existingTemplateNames = await prisma.template.findMany({
-        where: { tenantId: tenant.id },
-        select: { name: true, language: true },
-      });
-
-      const existingKeys = new Set(
-        existingTemplateNames.map(t => `${t.name}-${t.language}`)
-      );
-
-      const newGlobalTemplates = await prisma.template.findMany({
-        where: { tenantId: 'global', isActive: true },
-      });
-
-      const templatesToCreate = newGlobalTemplates.filter(
-        template => !existingKeys.has(`${template.name}-${template.language}`)
-      );
-
-      if (templatesToCreate.length > 0) {
-        const tenantTemplates = templatesToCreate.map((template) => ({
-          name: template.name,
-          description: template.description,
-          type: template.type,
-          subject: template.subject,
-          body: template.body,
-          language: template.language,
-          isActive: template.isActive,
-          tenantId: tenant.id,
-        }));
-
-        await prisma.template.createMany({
-          data: tenantTemplates,
+      console.log(`\n   📝 Processing templates for tenant: ${tenant.id}`);
+      
+      for (const globalTemplate of allGlobalTemplates) {
+        // Try to find existing tenant template
+        const existingTenantTemplate = await prisma.template.findFirst({
+          where: {
+            tenantId: tenant.id,
+            name: globalTemplate.name,
+            language: globalTemplate.language,
+          },
         });
 
-        console.log(`   ✅ Added ${templatesToCreate.length} new templates for ${tenant.id}`);
+        if (existingTenantTemplate) {
+          // Update existing tenant template with global template content
+          await prisma.template.update({
+            where: { id: existingTenantTemplate.id },
+            data: {
+              description: globalTemplate.description,
+              type: globalTemplate.type,
+              subject: globalTemplate.subject,
+              body: globalTemplate.body,
+              isActive: globalTemplate.isActive,
+            },
+          });
+          console.log(`      ✅ Updated existing template: ${globalTemplate.name} for ${tenant.id}`);
+        } else {
+          // Create new tenant template
+          await prisma.template.create({
+            data: {
+              name: globalTemplate.name,
+              description: globalTemplate.description,
+              type: globalTemplate.type,
+              subject: globalTemplate.subject,
+              body: globalTemplate.body,
+              language: globalTemplate.language,
+              isActive: globalTemplate.isActive,
+              tenantId: tenant.id,
+            },
+          });
+          console.log(`      ✅ Created new template: ${globalTemplate.name} for ${tenant.id}`);
+        }
       }
     }
 
