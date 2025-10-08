@@ -1214,6 +1214,57 @@ Hiring Team
         isActive: true,
         tenantId: 'global',
       },
+      {
+        id: 'template-application-submitted',
+        name: 'application-submitted',
+        description: 'Notification sent when a candidate submits a job application',
+        type: 'email',
+        subject: 'Application Submitted - {{job_requisition_title}}',
+        body: `<!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Application Submitted</title>
+      </head>
+      <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="background-color: #f8f9fa; padding: 30px; border-radius: 8px;">
+          <h1 style="color: #2c3e50; margin-bottom: 20px;">Application Submitted Successfully</h1>
+          
+          <p>Dear {{full_name}},</p>
+          
+          <p>Thank you for your interest in the <strong>{{job_requisition_title}}</strong> position. We have successfully received your application.</p>
+          
+          <div style="background-color: #e9ecef; padding: 15px; border-radius: 5px; margin: 20px 0;">
+            <p><strong>Application Details:</strong></p>
+            <ul style="margin: 10px 0;">
+              <li><strong>Application ID:</strong> {{application_id}}</li>
+              <li><strong>Position:</strong> {{job_requisition_title}}</li>
+              <li><strong>Status:</strong> {{status}}</li>
+              <li><strong>Submitted:</strong> {{submitted_at}}</li>
+            </ul>
+          </div>
+          
+          <p>Our recruitment team will review your application and contact you if your qualifications match our requirements. This process typically takes 5-10 business days.</p>
+          
+          <p>In the meantime, you can:</p>
+          <ul>
+            <li>Check your application status at any time</li>
+            <li>Update your profile information</li>
+            <li>Browse other open positions</li>
+          </ul>
+          
+          <p>We appreciate your interest in joining our team and look forward to potentially working with you.</p>
+          
+          <p>Best regards,<br>
+          The Recruitment Team</p>
+        </div>
+      </body>
+      </html>`,
+        language: 'en',
+        isActive: true,
+        tenantId: 'global',
+      },
     ];
 
     // Create all templates

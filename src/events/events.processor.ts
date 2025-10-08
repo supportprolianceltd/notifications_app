@@ -13,7 +13,7 @@ export class EventsProcessor extends WorkerHost {
 
   async process(job: Job): Promise<any> {
     this.logger.log(`🤖 Starting to process job ${job.id}, type: ${job.name}`);
-    this.logger.debug(`Job data: ${JSON.stringify(job.data)}`);
+    this.logger.log(`📋 Job payload: ${JSON.stringify(job.data, null, 2)}`);
 
     try {
       await this.eventsService.handleEvent(job.data);

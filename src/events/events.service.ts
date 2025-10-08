@@ -17,6 +17,8 @@ export class EventsService {
   ) {}
 
   async handleEvent(eventData: any): Promise<string[]> {
+    this.logger.log(`📦 Received event payload: ${JSON.stringify(eventData, null, 2)}`);
+    
     // 1. Validate the incoming event data against our DTO
     const event = plainToInstance(IncomingEventDto, eventData);
     const errors = await validate(event);
@@ -34,7 +36,14 @@ export class EventsService {
       throw new BadRequestException(`Tenant '${tenantId}' does not exist`);
     }
 
-    this.logger.log(`Received event: ${event.metadata.event_type}`);
+    this.logger.log(`🎯 Processing event: ${event.metadata.event_type} for tenant: ${tenantId}`);
+    this.logger.log(`📊 Event data summary: ${JSON.stringify({
+      event_type: event.metadata.event_type,
+      tenant_id: tenantId,
+      created_at: event.metadata.created_at,
+      data_keys: Object.keys(event.data || {}),
+      recipient_email: event.data?.email || event.data?.user_email || 'N/A'
+    }, null, 2)}`);
 
     // 3. Route the event based on its type
     let jobIds: string[] = [];
@@ -126,6 +135,10 @@ export class EventsService {
 
         case 'candidate.shortlisted.gaps':
           jobIds = await this.handleCandidateShortlistedWithGaps(event);
+          break;
+
+        case 'application.submitted':
+          jobIds = await this.handleApplicationSubmitted(event);
           break;
 
         // TODO: Add more cases for other event types
@@ -620,6 +633,29 @@ export class EventsService {
         return job.id ? [job.id] : [];
       }
 
+      private async handleApplicationSubmitted(event: IncomingEventDto): Promise<string[]> {
+        this.logger.log(`Handling application submitted for: ${event.data.email}`);
+
+        const job = await this.emailQueue.add('application-submitted', {
+          to: event.data.email,
+          subject: 'Application Submitted Successfully',
+          template: 'application-submitted',
+          context: {
+            full_name: event.data.full_name,
+            job_requisition_id: event.data.job_requisition_id,
+            job_requisition_title: event.data.job_requisition_title,
+            application_id: event.data.application_id,
+            status: event.data.status,
+          },
+          tenantId: event.metadata.tenant_id,
+          userId: event.data.application_id,
+          userName: event.data.full_name,
+          eventType: event.metadata.event_type,
+        });
+
+        this.logger.log(`📧 Added application submitted email to queue for: ${event.data.email}`);
+        return job.id ? [job.id] : [];
+      }
 
       // Helper method to calculate total gap duration
       private calculateTotalGapDuration(gaps: any[]): string {
