@@ -1241,7 +1241,6 @@ Hiring Team
               <li><strong>Application ID:</strong> {{application_id}}</li>
               <li><strong>Position:</strong> {{job_requisition_title}}</li>
               <li><strong>Status:</strong> {{status}}</li>
-              <li><strong>Submitted:</strong> {{submitted_at}}</li>
             </ul>
           </div>
           
