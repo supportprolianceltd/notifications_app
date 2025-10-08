@@ -11,6 +11,7 @@ import { emailsSentCounter } from '../../metrics/metrics.controller';
 export class EmailService {
   private readonly logger = new Logger(EmailService.name);
   private transporters = new Map<string, nodemailer.Transporter>(); // cache by tenantId
+  private usingDefaultConfig = new Set<string>(); // track which tenants are using default config
 
   constructor(
     private readonly templatesService: TemplatesService,
@@ -40,6 +41,7 @@ export class EmailService {
           await transporter.verify();
           this.logger.log(`✅ Verified default transporter for tenant ${tenantId}`);
           this.transporters.set(tenantId, transporter);
+          this.usingDefaultConfig.add(tenantId); // mark as using default config
           return transporter;
         } catch (err) {
           this.logger.error(`❌ Failed to verify default transporter for tenant ${tenantId}`, err.message);
@@ -62,6 +64,7 @@ export class EmailService {
       this.logger.log(`✅ Verified transporter for tenant ${tenantId}`);
 
       this.transporters.set(tenantId, transporter);
+      this.usingDefaultConfig.delete(tenantId); // mark as using tenant config
       return transporter;
     } catch (err) {
       this.logger.error(`❌ Failed to init transporter for tenant ${tenantId}`, err.message);
@@ -73,6 +76,7 @@ export class EmailService {
         await fallbackTransporter.verify();
         this.logger.log(`✅ Verified default fallback transporter for tenant ${tenantId}`);
         this.transporters.set(tenantId, fallbackTransporter);
+        this.usingDefaultConfig.add(tenantId); // mark as using default config
         return fallbackTransporter;
       } catch (fallbackErr) {
         this.logger.error(`❌ Default email configuration also failed for tenant ${tenantId}`, fallbackErr.message);
@@ -83,20 +87,20 @@ export class EmailService {
 
   private getDefaultEmailConfig() {
     return {
-      host: 'premium292.web-hosting.com',
-      port: 587,
-      secure: false,
+      host: 'smtp.zoho.com',
+      port: 465,
+      secure: true,
       auth: {
-        user: 'notification@temp.artstraining.co.uk',
-        pass: 'Restricted123!',
+        user: 'tegatega@zohomail.com',
+        pass: 'vV4NwbR2T5Ue',
       },
     };
   }
 
   private getDefaultFromConfig() {
     return {
-      fromEmail: 'notification@temp.artstraining.co.uk',
-      fromName: 'Testing Mail',
+      fromEmail: 'tegatega@zohomail.com',
+      fromName: 'E30S',
     };
   }
 
@@ -174,16 +178,29 @@ export class EmailService {
 
       // Get email config for 'from' field
       let emailConfig;
-      try {
-        emailConfig = await this.tenantEmailProvidersService.getDefaultEmailProvider(tenantId);
-      } catch (err) {
-        // If no email provider found, emailConfig will be null and we'll use default
-        this.logger.warn(`No email provider for tenant ${tenantId}, using default from config`);
+      const isUsingDefaultConfig = this.usingDefaultConfig.has(tenantId);
+      
+      if (!isUsingDefaultConfig) {
+        try {
+          emailConfig = await this.tenantEmailProvidersService.getDefaultEmailProvider(tenantId);
+        } catch (err) {
+          // If no email provider found, emailConfig will be null and we'll use default
+          this.logger.warn(`No email provider for tenant ${tenantId}, using default from config`);
+        }
+      } else {
+        this.logger.log(`Tenant ${tenantId} is using default SMTP config, using default from address`);
       }
 
       const defaultFromConfig = this.getDefaultFromConfig();
-      const fromEmail = emailConfig?.fromEmail || branding?.supportEmail || defaultFromConfig.fromEmail;
-      const fromName = emailConfig?.fromName || branding?.companyName || defaultFromConfig.fromName;
+      
+      // If using default config, always use default from address
+      const fromEmail = isUsingDefaultConfig ? 
+        defaultFromConfig.fromEmail : 
+        (emailConfig?.fromEmail || branding?.supportEmail || defaultFromConfig.fromEmail);
+        
+      const fromName = isUsingDefaultConfig ? 
+        defaultFromConfig.fromName : 
+        (emailConfig?.fromName || branding?.companyName || defaultFromConfig.fromName);
 
       const mailOptions = {
         from: `${fromName} <${fromEmail}>`,
@@ -192,6 +209,7 @@ export class EmailService {
         html,
       };
 
+      this.logger.log(`📧 Sending email - From: ${mailOptions.from}, To: ${to}, Subject: ${finalSubject}`);
       const info = await transporter.sendMail(mailOptions);
 
       // 7. Update log
