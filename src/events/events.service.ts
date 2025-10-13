@@ -141,6 +141,14 @@ export class EventsService {
           jobIds = await this.handleApplicationSubmitted(event);
           break;
 
+        case 'user.document.expiry.warning':
+          jobIds = await this.handleDocumentExpiry(event);
+          break;
+
+        case 'user.document.expired':
+          jobIds = await this.handleDocumentExpired(event);
+          break;
+
         // TODO: Add more cases for other event types
         default:
           this.logger.warn(`Unhandled event type: ${event.metadata.event_type}`);
@@ -656,6 +664,80 @@ export class EventsService {
         this.logger.log(`📧 Added application submitted email to queue for: ${event.data.email}`);
         return job.id ? [job.id] : [];
       }
+
+      private async handleDocumentExpiry(event: IncomingEventDto): Promise<string[]> {
+        const {user_email, full_name, document_type, document_name, expiry_date, days_left, message, timezone } = event.data;
+
+        this.logger.log(
+          `Handling ${document_type} expiry warning for: ${user_email} (${days_left} days left)`
+        );
+        
+        let subject = 'Document Expiry Reminder';
+        const daysLeft = parseInt(days_left);
+
+        
+        if (daysLeft <= 1) subject = 'FINAL WARNING: Document Expires Tomorrow';
+        else if (daysLeft <= 3) subject = `CRITICAL: Document Expires in ${daysLeft} Days`;
+        else if (daysLeft <= 7) subject = `URGENT: Document Expires in ${daysLeft} Days`;
+        else if (daysLeft <= 14) subject = `Document Expiry Alert - ${daysLeft} Days Remaining`;
+        else subject = `Document Expiry Reminder - ${daysLeft} Days Remaining`;
+
+        const job = await this.emailQueue.add('document-expiry', {
+          to: user_email,
+          subject: subject,
+          template: 'document-expiry',
+          context: {
+            full_name,
+            document_type,
+            document_name,
+            expiry_date,
+            days_left,
+            message,
+            timezone,
+          },
+          tenantId: event.metadata.tenant_id,
+          userId: user_email,
+          userName: event.data.full_name,
+          eventType: event.metadata.event_type,
+        });
+
+        this.logger.log(`📧 Added document expiry email to queue for: ${user_email}`);
+        return job.id ? [job.id] : [];
+      }
+
+      private async handleDocumentExpired(event: IncomingEventDto): Promise<string[]> {
+        const {user_email, full_name, document_type, document_name, expiry_date, days_expired, message, timezone } = event.data;
+
+        this.logger.log(
+          `Handling ${document_type} expired notification for: ${user_email} (expired ${days_expired} days ago)`
+        );
+        
+        const subject = `EXPIRED: ${document_type} - Immediate Action Required`;
+
+        const job = await this.emailQueue.add('document-expired', {
+          to: user_email,
+          subject: subject,
+          template: 'document-expired',
+          context: {
+            full_name,
+            document_type,
+            document_name,
+            expiry_date,
+            days_expired,
+            message,
+            timezone,
+          },
+          tenantId: event.metadata.tenant_id,
+          userId: user_email,
+          userName: full_name,
+          eventType: event.metadata.event_type,
+        });
+
+        this.logger.log(`📧 Added document expired email to queue for: ${user_email}`);
+        return job.id ? [job.id] : [];
+      }
+
+
 
       // Helper method to calculate total gap duration
       private calculateTotalGapDuration(gaps: any[]): string {
