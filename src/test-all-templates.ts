@@ -1268,6 +1268,195 @@ Hiring Team
         isActive: true,
         tenantId: 'global',
       },
+          // Document Expiry Template
+      {
+        id: 'template-document-expiry',
+        name: 'document-expiry',
+        description: 'Generic notification sent when any document is about to expire',
+        type: 'email',
+        subject: 'Document Renewal Reminder - {{days_left}} Days',
+        body: `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+      body { 
+        font-family: Arial, sans-serif; 
+        line-height: 1.6; 
+        color: #333; 
+        max-width: 600px; 
+        margin: 0 auto; 
+        padding: 20px; 
+      }
+      .container { 
+        background: #fff; 
+        padding: 30px; 
+        border: 1px solid #ddd; 
+        border-radius: 5px; 
+      }
+      .header { 
+        border-bottom: 1px solid #eee; 
+        padding-bottom: 15px; 
+        margin-bottom: 20px; 
+      }
+      .details { 
+        background: #f9f9f9; 
+        padding: 15px; 
+        border-radius: 3px; 
+        margin: 15px 0; 
+      }
+    </style>
+</head>
+<body>
+    <div class="container">
+      <div class="header">
+        <h2>Document Renewal Reminder</h2>
+      </div>
+      
+      <p>Dear {{full_name}},</p>
+      
+      <p>Your {{document_type}} will expire in {{days_left}} days. Please arrange for renewal at your earliest convenience.</p>
+      
+      <div class="details">
+        <p><strong>Document:</strong> {{document_name}}</p>
+        <p><strong>Expiry Date:</strong> {{expiry_date}}</p>
+        <p><strong>Days Remaining:</strong> {{days_left}}</p>
+      </div>
+      
+      {{#if message}}
+      <p><strong>Note:</strong> {{message}}</p>
+      {{/if}}
+      
+      <p>Please contact the relevant department to begin the renewal process.</p>
+      
+      <p>Best regards,<br>HR Team</p>
+    </div>
+</body>
+</html>`,
+        language: 'en',
+        isActive: true,
+        tenantId: 'global',
+      },
+
+            // Document Expired Template - NEW
+      {
+        id: 'template-document-expired',
+        name: 'document-expired',
+        description: 'Notification sent when a document has already expired',
+        type: 'email',
+        subject: 'EXPIRED: {{document_type}} - Immediate Action Required',
+        body: `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+      body { 
+        font-family: Arial, sans-serif; 
+        line-height: 1.6; 
+        color: #333; 
+        max-width: 600px; 
+        margin: 0 auto; 
+        padding: 20px; 
+      }
+      .container { 
+        background: #fff; 
+        padding: 30px; 
+        border: 1px solid #dc3545; 
+        border-radius: 5px; 
+      }
+      .header { 
+        border-bottom: 2px solid #dc3545; 
+        padding-bottom: 15px; 
+        margin-bottom: 20px; 
+        text-align: center;
+      }
+      .expired-badge {
+        background: #dc3545;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: bold;
+        display: inline-block;
+        margin-bottom: 10px;
+      }
+      .details { 
+        background: #f8d7da; 
+        padding: 20px; 
+        border-radius: 5px; 
+        margin: 20px 0; 
+        border-left: 4px solid #dc3545;
+      }
+      .urgent-action {
+        background: #fff3cd;
+        border: 1px solid #ffeaa7;
+        padding: 20px;
+        border-radius: 5px;
+        border-left: 4px solid #ffc107;
+        margin: 20px 0;
+      }
+      .action-list {
+        background: #d1ecf1;
+        padding: 15px;
+        border-radius: 5px;
+        margin: 15px 0;
+      }
+    </style>
+</head>
+<body>
+    <div class="container">
+      <div class="header">
+        <div class="expired-badge">⚠️ EXPIRED</div>
+        <h2 style="color: #dc3545; margin: 0;">Document Has Expired</h2>
+      </div>
+      
+      <p>Dear {{full_name}},</p>
+      
+      <p><strong>IMPORTANT:</strong> Your {{document_type}} has expired and requires immediate attention.</p>
+      
+      <div class="details">
+        <h4 style="color: #721c24; margin-top: 0;">📋 Expired Document Details</h4>
+        <p><strong>Document:</strong> {{document_name}}</p>
+        <p><strong>Document Type:</strong> {{document_type}}</p>
+        <p><strong>Expired Date:</strong> {{expiry_date}}</p>
+        <p><strong>Days Since Expiry:</strong> {{days_expired}} days ago</p>
+        <p><strong>Timezone:</strong> {{timezone}}</p>
+      </div>
+      
+      {{#if message}}
+      <div class="urgent-action">
+        <h4 style="color: #856404; margin-top: 0;">💬 Important Message</h4>
+        <p style="margin-bottom: 0;">{{message}}</p>
+      </div>
+      {{/if}}
+      
+      <div class="action-list">
+        <h4 style="color: #0c5460; margin-top: 0;">📝 Immediate Actions Required</h4>
+        <ul>
+          <li><strong>Contact the relevant department immediately</strong> to report the expired document</li>
+          <li><strong>Begin the renewal process urgently</strong> to avoid further complications</li>
+          <li><strong>Gather all required documentation</strong> for expedited processing</li>
+          <li><strong>Inform your supervisor/HR</strong> of the expired status</li>
+          <li><strong>Submit renewal application</strong> as soon as possible</li>
+        </ul>
+      </div>
+      
+      <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
+        <p style="margin: 0;"><strong>⏰ Time Sensitive:</strong> Please take action immediately to avoid any service interruptions or compliance issues.</p>
+      </div>
+      
+      <p>If you have already submitted a renewal application, please contact the relevant department to confirm receipt and processing status.</p>
+      
+      <p style="color: #dc3545;"><strong>This requires your immediate attention.</strong></p>
+      
+      <p>Best regards,<br>
+      <strong>HR Team</strong></p>
+    </div>
+</body>
+</html>`,
+        language: 'en',
+        isActive: true,
+        tenantId: 'global',
+      },
     ];
 
     // Create all templates
@@ -1397,6 +1586,19 @@ Hiring Team
           schedule_id: 'schedule-test-999'
         }
       },
+      {
+        event_type: 'user.document.expiry.warning',
+        data: {
+          user_email: 'tegaokorare91@gmail.com',
+          full_name: 'John Doe',
+          document_type: 'Right to Work Permit',
+          document_name: 'UK Work Visa',
+          expiry_date: '2025-01-27',
+          days_left: '7',
+          message: 'Your work authorization is expiring soon. Please renew immediately to avoid employment disruption.',
+          timezone: 'GMT'
+        }
+      },
       // Add this test event to your testEvents array in test-all-templates.ts
       // {
       //   event_type: 'candidate.shortlisted.gaps',
@@ -1425,19 +1627,19 @@ Hiring Team
       // },
 ];
 
-    // for (const testEvent of testEvents) {
-    //   const job = await eventsQueue.add(testEvent.event_type, {
-    //     metadata: {
-    //       event_id: 'test-' + Date.now(),
-    //       event_type: testEvent.event_type,
-    //       created_at: new Date().toISOString(),
-    //       source: 'test-script',
-    //       tenant_id: 'test-tenant-1',
-    //     },
-    //     data: testEvent.data,
-    //   });
-    //   console.log(`   ✅ Added test event: ${testEvent.event_type} (Job ID: ${job.id})`);
-    // }
+    for (const testEvent of testEvents) {
+      const job = await eventsQueue.add(testEvent.event_type, {
+        metadata: {
+          event_id: 'test-' + Date.now(),
+          event_type: testEvent.event_type,
+          created_at: new Date().toISOString(),
+          source: 'test-script',
+          tenant_id: 'test-tenant-1',
+        },
+        data: testEvent.data,
+      });
+      console.log(`   ✅ Added test event: ${testEvent.event_type} (Job ID: ${job.id})`);
+    }
 
     console.log('\n👀 Now check your NestJS application logs to see if all templates work!');
     console.log('⏳ Waiting 5 seconds for processing...');
