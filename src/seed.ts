@@ -93,24 +93,24 @@ async function testDatabase() {
     const emailProvidersSeedData = [
       {
         tenantConfigId: tenantConfigs[0].id,
-        host: 'premium292.web-hosting.com',
-        port: 587,
-        secure: false,
-        username: 'notification@temp.artstraining.co.uk', // replace with real/test creds
-        password: 'Restricted123!',
-        fromEmail: 'notification@temp.artstraining.co.uk',
-        fromName: 'Testing Mail',
+        host: 'email-smtp.us-east-1.amazonaws.com',
+        port: 465,
+        secure: true,
+        username: 'AKIAQQPIOM5KNZTR32JX', // replace with real/test creds
+        password: 'BNwcx5YlsqBBRkZV8DY4fVM4cvy7tvesvkoBqwh1kl/x',
+        fromEmail: 'no-reply@e3os.co.uk',
+        fromName: 'E3OS',
         isDefault: true,
       },
       {
         tenantConfigId: tenantConfigs[1].id,
-        host: 'smtp.sendgrid.net',
+        host: 'premium292.web-hosting.com',
         port: 587,
         secure: false,
-        username: 'apikey', // replace with real/test creds
+        username: 'notification@temp.artstraining.co.uk', // replace with real/test creds
         password: process.env.SENDGRID_API_KEY ?? '', // Ensure password is always a string
-        fromEmail: 'noreply@inboxquality.com',
-        fromName: 'Dynocol Studios',
+        fromEmail: 'notification@temp.artstraining.co.uk',
+        fromName: 'Arts Training',
         isDefault: true,
       },
     ];

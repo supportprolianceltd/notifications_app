@@ -87,20 +87,20 @@ export class EmailService {
 
   private getDefaultEmailConfig() {
     return {
-      host: 'smtp.zoho.com',
+      host: 'email-smtp.us-east-1.amazonaws.com',
       port: 465,
       secure: true,
       auth: {
-        user: 'tegatega@zohomail.com',
-        pass: 'vV4NwbR2T5Ue',
+        user: 'AKIAQQPIOM5KNZTR32JX',
+        pass: 'BNwcx5YlsqBBRkZV8DY4fVM4cvy7tvesvkoBqwh1kl/x',
       },
     };
   }
 
   private getDefaultFromConfig() {
     return {
-      fromEmail: 'tegatega@zohomail.com',
-      fromName: 'E30S',
+      fromEmail: 'no-reply@e3os.co.uk',
+      fromName: 'E3OS',
     };
   }
 
