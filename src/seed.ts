@@ -45,31 +45,44 @@ async function testDatabase() {
     });
     console.log(`   ✅ Global tenant branding created: ${globalBranding.companyName}`);
 
-    // Create email provider for global tenant (using previous test-tenant-1 config)
-    await prisma.tenantEmailProvider.upsert({
-      where: { id: globalConfig.id }, // upsert by configId for idempotency
-      update: {
-        host: 'email-smtp.eu-west-2.amazonaws.com',
-        port: 456,
-        secure: true,
-        username: 'AKIAQQPIOM5KEYH7UZWS',
-        password: 'BOh5oE1xO9F7gQA5CkgCPvlaZSmIez1GCLoLFsUlBGC9',
-        fromEmail: 'no-reply@e3os.co.uk',
-        fromName: 'E3OS',
-        isDefault: true,
-      },
-      create: {
-        tenantConfigId: globalConfig.id,
-        host: 'email-smtp.eu-west-2.amazonaws.com',
-        port: 456,
-        secure: true,
-        username: 'AKIAQQPIOM5KEYH7UZWS',
-        password: 'BOh5oE1xO9F7gQA5CkgCPvlaZSmIez1GCLoLFsUlBGC9',
-        fromEmail: 'no-reply@e3os.co.uk',
-        fromName: 'E3OS',
-        isDefault: true,
-      },
+    // Create/update email provider for global tenant (proper idempotency)
+    const existingEmailProvider = await prisma.tenantEmailProvider.findFirst({
+      where: { tenantConfigId: globalConfig.id }
     });
+
+    if (existingEmailProvider) {
+      // Update existing email provider
+      await prisma.tenantEmailProvider.update({
+        where: { id: existingEmailProvider.id },
+        data: {
+          host: process.env.SMTP_HOST || 'email-smtp.eu-west-2.amazonaws.com',
+          port: parseInt(process.env.SMTP_PORT || '465'),
+          secure: process.env.SMTP_SECURE === 'true',
+          username: process.env.SMTP_USER || 'AKIAQQPIOM5KEYH7UZWS',
+          password: process.env.SMTP_PASS || 'BOh5oE1xO9F7gQA5CkgCPvlaZSmIez1GCLoLFsUlBGC9',
+          fromEmail: process.env.FROM_EMAIL || 'no-reply@e3os.co.uk',
+          fromName: process.env.FROM_NAME || 'E3OS',
+          isDefault: true,
+        },
+      });
+      console.log(`   ✅ Global email provider updated`);
+    } else {
+      // Create new email provider
+      await prisma.tenantEmailProvider.create({
+        data: {
+          tenantConfigId: globalConfig.id,
+          host: process.env.SMTP_HOST || 'email-smtp.eu-west-2.amazonaws.com',
+          port: parseInt(process.env.SMTP_PORT || '465'),
+          secure: process.env.SMTP_SECURE === 'true',
+          username: process.env.SMTP_USER || 'AKIAQQPIOM5KEYH7UZWS',
+          password: process.env.SMTP_PASS || 'BOh5oE1xO9F7gQA5CkgCPvlaZSmIez1GCLoLFsUlBGC9',
+          fromEmail: process.env.FROM_EMAIL || 'no-reply@e3os.co.uk',
+          fromName: process.env.FROM_NAME || 'E3OS',
+          isDefault: true,
+        },
+      });
+      console.log(`   ✅ Global email provider created`);
+    }
     console.log(`   ✅ Global email provider created`);
 
     // Create all necessary templates
