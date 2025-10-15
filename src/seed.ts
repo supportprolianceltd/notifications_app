@@ -22,106 +22,55 @@ async function testDatabase() {
 
     // Test basic operations
     console.log('\n📊 Testing basic operations:');
-    
-    // Create test tenants
-    const tenants = [
-      {
-        id: 'test-tenant-1',
-        name: 'Test Tenant 1',
-      },
-      {
-        id: 'test-tenant-2', 
-        name: 'Test Tenant 2',
-      }
-    ];
 
-    for (const tenantData of tenants) {
-      const tenant = await prisma.tenant.upsert({
-        where: { id: tenantData.id },
-        update: {},
-        create: tenantData,
-      });
-      console.log(`   ✅ Tenant created: ${tenant.name}`);
-    }
+    // Create global tenant config
+    const globalConfig = await prisma.tenantConfig.upsert({
+      where: { tenantId: 'global' },
+      update: {},
+      create: { tenantId: 'global' },
+    });
+    console.log(`   ✅ Global tenant config created`);
 
-    // Create tenant configs for both tenants
-  const tenantConfigs: { id: string; tenantId: string }[] = [];
-    for (const tenantData of tenants) {
-      const config = await prisma.tenantConfig.upsert({
-        where: { tenantId: tenantData.id },
-        update: {},
-        create: { tenantId: tenantData.id },
-      });
-      tenantConfigs.push(config);
-      console.log(`   ✅ Tenant config created for: ${tenantData.id}`);
-    }
-
-    // Create tenant branding for both tenants
-    const brandingSeedData = [
-      {
-        tenantId: 'test-tenant-1',
-        companyName: 'Arts Training',
-        logoUrl: 'https://temp.artstraining.co.uk/uploads/system//d56a5489205fde270a6d8744f980f38f.png',
-        websiteUrl: 'https://temp.artstraining.co.uk',
-        supportEmail: 'notification@temp.artstraining.co.uk',
-        supportPhone: '+1-555-0123',
-        physicalAddress: '123 Test Street, Test City, TC 12345',
+    // Create global tenant branding for E3OS
+    const globalBranding = await prisma.tenantBrand.upsert({
+      where: { tenantId: 'global' },
+      update: {},
+      create: {
+        tenantId: 'global',
+        companyName: 'E3OS',
+        websiteUrl: 'https://e3os.co.uk',
+        supportEmail: 'support@e3os.co.uk',
         primaryColor: '#0066cc',
       },
-      {
-        tenantId: 'test-tenant-2',
-        companyName: 'Proliance Ltd',
-        logoUrl: 'https://prolianceltd.com/assets/anim-logo1-C0x_JQ1e.png',
-        websiteUrl: 'https://prolianceltd.com/',
-        supportEmail: 'notification@temp.artstraining.co.uk',
-        supportPhone: '+1-555-6789',
-        physicalAddress: '456 Another St, Other City, OC 67890',
-        primaryColor: '#ff6600',
-      }
-    ];
+    });
+    console.log(`   ✅ Global tenant branding created: ${globalBranding.companyName}`);
 
-    for (const brandData of brandingSeedData) {
-      const branding = await prisma.tenantBrand.upsert({
-        where: { tenantId: brandData.tenantId },
-        update: {},
-        create: brandData,
-      });
-      console.log(`   ✅ Tenant branding created: ${branding.companyName}`);
-    }
-
-    // Create email providers for both tenants
-    const emailProvidersSeedData = [
-      {
-        tenantConfigId: tenantConfigs[0].id,
-        host: 'email-smtp.us-east-1.amazonaws.com',
-        port: 465,
+    // Create email provider for global tenant (using previous test-tenant-1 config)
+    await prisma.tenantEmailProvider.upsert({
+      where: { id: globalConfig.id }, // upsert by configId for idempotency
+      update: {
+        host: 'email-smtp.eu-west-2.amazonaws.com',
+        port: 456,
         secure: true,
-        username: 'AKIAQQPIOM5KNZTR32JX', // replace with real/test creds
-        password: 'BNwcx5YlsqBBRkZV8DY4fVM4cvy7tvesvkoBqwh1kl/x',
+        username: 'AKIAQQPIOM5KEYH7UZWS',
+        password: 'BOh5oE1xO9F7gQA5CkgCPvlaZSmIez1GCLoLFsUlBGC9',
         fromEmail: 'no-reply@e3os.co.uk',
         fromName: 'E3OS',
         isDefault: true,
       },
-      {
-        tenantConfigId: tenantConfigs[1].id,
-        host: 'premium292.web-hosting.com',
-        port: 587,
-        secure: false,
-        username: 'notification@temp.artstraining.co.uk', // replace with real/test creds
-        password: process.env.SENDGRID_API_KEY ?? '', // Ensure password is always a string
-        fromEmail: 'notification@temp.artstraining.co.uk',
-        fromName: 'Arts Training',
+      create: {
+        tenantConfigId: globalConfig.id,
+        host: 'email-smtp.eu-west-2.amazonaws.com',
+        port: 456,
+        secure: true,
+        username: 'AKIAQQPIOM5KEYH7UZWS',
+        password: 'BOh5oE1xO9F7gQA5CkgCPvlaZSmIez1GCLoLFsUlBGC9',
+        fromEmail: 'no-reply@e3os.co.uk',
+        fromName: 'E3OS',
         isDefault: true,
       },
-    ];
-    for (const providerData of emailProvidersSeedData) {
-      const provider = await prisma.tenantEmailProvider.upsert({
-        where: { id: providerData.tenantConfigId }, // upsert by configId for idempotency
-        update: {},
-        create: providerData,
-      });
-      console.log(`   ✅ Email provider created for config: ${provider.tenantConfigId}`);
-    }
+    });
+    console.log(`   ✅ Global email provider created`);
 
     // Create all necessary templates
     const templatesToCreate = [
@@ -257,33 +206,6 @@ async function testDatabase() {
         create,
       });
       console.log(`   ✅ Template created: ${template.name} for ${template.tenantId}`);
-    }
-
-    // Create test user preferences for both users
-    const userPreferences = [
-      {
-        tenantId: 'test-tenant-1',
-        userId: 'user-test-001',
-        email: true,
-        sms: false,
-        push: true,
-      },
-      {
-        tenantId: 'test-tenant-2',
-        userId: 'user-test-002',
-        email: true,
-        sms: true,
-        push: false,
-      }
-    ];
-
-    for (const prefData of userPreferences) {
-      const preferences = await prisma.userPreference.upsert({
-        where: { tenantId_userId: { tenantId: prefData.tenantId, userId: prefData.userId } },
-        update: {},
-        create: prefData,
-      });
-      console.log(`   ✅ User preferences created for ${prefData.userId} in ${prefData.tenantId}`);
     }
 
     // Query to verify data

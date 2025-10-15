@@ -87,12 +87,12 @@ export class EmailService {
 
   private getDefaultEmailConfig() {
     return {
-      host: 'email-smtp.us-east-1.amazonaws.com',
+      host: 'email-smtp.eu-west-2.amazonaws.com',
       port: 465,
       secure: true,
       auth: {
-        user: 'AKIAQQPIOM5KNZTR32JX',
-        pass: 'BNwcx5YlsqBBRkZV8DY4fVM4cvy7tvesvkoBqwh1kl/x',
+        user: 'AKIAQQPIOM5KEYH7UZWS',
+        pass: 'BOh5oE1xO9F7gQA5CkgCPvlaZSmIez1GCLoLFsUlBGC9',
       },
     };
   }

@@ -1545,7 +1545,7 @@ Hiring Team
     const testEvents = [
       {
         event_type: 'user.email.verified',
-        data: { user_id: 'user-test-001', user_email: 'tegaokorare91@gmail.com', user_name: 'Test User' }
+        data: { user_id: 'user-test-001', user_email: 'support@prolianceltd.com', user_name: 'Test User' }
       },
       // {
       //   event_type: 'user.login.succeeded', 
@@ -1574,7 +1574,7 @@ Hiring Team
         data: {
           application_id: 'app-test-67890',
           full_name: 'Jane Doe',
-          email: 'tegaokorare91@gmail.com',
+          email: 'support@prolianceltd.com',
           job_requisition_id: 'job-67890',
           status: 'scheduled',
           interview_start_date_time: '2025-09-19T10:00:00+01:00',
@@ -1589,7 +1589,7 @@ Hiring Team
       {
         event_type: 'user.document.expiry.warning',
         data: {
-          user_email: 'tegaokorare91@gmail.com',
+          user_email: 'support@prolianceltd.com',
           full_name: 'John Doe',
           document_type: 'Right to Work Permit',
           document_name: 'UK Work Visa',
@@ -1634,7 +1634,7 @@ Hiring Team
           event_type: testEvent.event_type,
           created_at: new Date().toISOString(),
           source: 'test-script',
-          tenant_id: 'test-tenant-1',
+          tenant_id: 'global',
         },
         data: testEvent.data,
       });
