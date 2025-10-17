@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { TenantEmailProvidersService } from './tenant-email-providers.service';
 
 @Controller('tenants/:tenantId/email-providers')
@@ -26,7 +26,7 @@ export class TenantEmailProvidersController {
         return this.emailProvidersService.getDefaultEmailProvider(tenantId);
     }
 
-    @Put(':providerId')
+    @Patch(':providerId')
     async updateEmailProvider(
         @Param('providerId') providerId: string,
         @Body() updateData: any

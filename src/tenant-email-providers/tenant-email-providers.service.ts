@@ -75,11 +75,11 @@ export class TenantEmailProvidersService {
     });
 
     if (!tenantConfig || tenantConfig.emailProviders.length === 0) {
-      console.log(`⚠️ No email provider found for tenant: ${tenantId}, trying fallback tenant: test-tenant-1`);
-      
-      // Fallback to test-tenant-1 configuration
+      console.log(`⚠️ No email provider found for tenant: ${tenantId}, trying fallback tenant: global`);
+
+      // Fallback to global configuration
       const fallbackConfig = await this.prisma.tenantConfig.findUnique({
-        where: { tenantId: 'test-tenant-1' },
+        where: { tenantId: 'global' },
         include: {
           emailProviders: true
         }
@@ -90,7 +90,7 @@ export class TenantEmailProvidersService {
         return null;
       }
 
-      console.log(`✅ Using fallback email provider from tenant: test-tenant-1 for tenant: ${tenantId}`);
+      console.log(`✅ Using fallback email provider from ${tenantId} tenant`);
       return fallbackConfig.emailProviders[0];
     }
 
