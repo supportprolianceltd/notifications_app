@@ -6,12 +6,14 @@ import { TemplatesService } from '../../templates/templates.service';
 import { NotificationsService } from '../../notifications/notifications.service';
 import { TenantEmailProvidersService } from '../../tenant-email-providers/tenant-email-providers.service';
 import { emailsSentCounter } from '../../metrics/metrics.controller';
+import { RateLimiterMemory } from 'rate-limiter-flexible';
 
 @Injectable()
 export class EmailService {
   private readonly logger = new Logger(EmailService.name);
   private transporters = new Map<string, nodemailer.Transporter>(); // cache by tenantId
   private usingDefaultConfig = new Set<string>(); // track which tenants are using default config
+  private tenantEmailLimiters = new Map<string, RateLimiterMemory>();
 
   constructor(
     private readonly templatesService: TemplatesService,
@@ -87,20 +89,20 @@ export class EmailService {
 
   private getDefaultEmailConfig() {
     return {
-      host: 'email-smtp.eu-west-2.amazonaws.com',
-      port: 465,
-      secure: true,
+      host: process.env.SMTP_HOST || 'email-smtp.eu-west-2.amazonaws.com',
+      port: parseInt(process.env.SMTP_PORT || '465'),
+      secure: process.env.SMTP_SECURE === 'true',
       auth: {
-        user: 'AKIAQQPIOM5KEYH7UZWS',
-        pass: 'BOh5oE1xO9F7gQA5CkgCPvlaZSmIez1GCLoLFsUlBGC9',
+        user: process.env.SMTP_USER || '',
+        pass: process.env.SMTP_PASS || '',
       },
     };
   }
 
   private getDefaultFromConfig() {
     return {
-      fromEmail: 'no-reply@e3os.co.uk',
-      fromName: 'E3OS',
+      fromEmail: process.env.FROM_EMAIL || 'no-reply@e3os.co.uk',
+      fromName: process.env.FROM_NAME || 'E3OS',
     };
   }
 
@@ -116,6 +118,19 @@ export class EmailService {
     } as any;
   }
 
+  private getTenantLimiter(tenantId: string): RateLimiterMemory {
+    if (!this.tenantEmailLimiters.has(tenantId)) {
+      this.tenantEmailLimiters.set(
+        tenantId,
+        new RateLimiterMemory({
+          points: parseInt(process.env.TENANT_EMAIL_RATE_LIMIT || '100'), // e.g. 100 emails
+          duration: parseInt(process.env.TENANT_EMAIL_RATE_DURATION || '3600'), // per hour
+        })
+      );
+    }
+    return this.tenantEmailLimiters.get(tenantId)!;
+  }
+
   async sendEmail(jobData: {
     to: string;
     subject: string;
@@ -129,6 +144,14 @@ export class EmailService {
     const { to, subject, template, context, tenantId, userId, userName, eventType } = jobData;
 
     try {
+      // Per-tenant rate limiting
+      try {
+        await this.getTenantLimiter(tenantId).consume(tenantId);
+      } catch (rateErr) {
+        this.logger.warn(`Tenant ${tenantId} exceeded email rate limit`);
+        throw new Error('Tenant email rate limit exceeded, try again later.');
+      }
+
       // 1. Check user preferences
       if (userId) {
         const canSend = await this.notificationsService.checkUserPreferences(
