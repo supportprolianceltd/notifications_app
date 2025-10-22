@@ -673,32 +673,143 @@ async function testAllTemplates() {
         name: 'interview-scheduled',
         type: 'email',
         subject: 'Interview Invitation - {{job_requisition_title}}',
-        body: `Hello {{full_name}},
+        body: `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interview Invitation</title>
+  <style>
+    /* Reset */
+    body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+    table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+    img { -ms-interpolation-mode: bicubic; }
 
-We’re pleased to invite you to an interview for the {{job_requisition_title}} role at {{company_name}}.
+    body { margin: 0; padding: 0; width: 100% !important; height: 100% !important; background-color: #f8fafc; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    .email-wrapper { width: 100%; max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); border: 1px solid #e2e8f0; }
+    .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; padding: 32px 40px; text-align: center; }
+    .header h1 { margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -0.5px; }
+    .header p { margin: 8px 0 0; opacity: 0.9; font-size: 16px; }
+    .content { padding: 40px; color: #334155; line-height: 1.6; }
+    .greeting { font-size: 18px; margin-bottom: 24px; color: #1e293b; }
+    .intro { margin-bottom: 32px; font-size: 16px; color: #475569; }
+    .interview-card { background: #f8fafc; border-radius: 8px; padding: 24px; margin-bottom: 24px; border-left: 4px solid #3b82f6; }
+    .interview-title { font-size: 18px; font-weight: 600; color: #1e293b; margin-bottom: 16px; }
+    .detail-item { margin-bottom: 12px; display: flex; }
+    .detail-label { color: #64748b; font-weight: 500; min-width: 120px; font-size: 14px; }
+    .detail-value { color: #1e293b; font-weight: 500; font-size: 14px; }
+    .action-section { background: #f0f9ff; border-radius: 8px; padding: 24px; margin: 32px 0; text-align: center; border: 1px solid #e0f2fe; }
+    .action-title { font-size: 16px; font-weight: 600; color: #0369a1; margin-bottom: 16px; }
+    .btn { display: inline-block; padding: 14px 32px; background: #3b82f6; color: white; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 15px; transition: all 0.2s ease; }
+    .btn:hover { background: #2563eb; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
+    .secondary-btn { background: #64748b; margin-left: 12px; }
+    .secondary-btn:hover { background: #475569; }
+    .location-section, .virtual-section { background: #fff7ed; border-radius: 8px; padding: 20px; margin: 20px 0; border-left: 4px solid #f97316; }
+    .section-title { font-size: 16px; font-weight: 600; color: #c2410c; margin-bottom: 12px; }
+    .instructions { background: #f1f5f9; border-radius: 6px; padding: 16px; margin: 24px 0; font-size: 14px; color: #475569; }
+    .footer { padding: 32px 40px; background: #1e293b; color: #94a3b8; font-size: 14px; text-align: center; }
+    .footer a { color: #cbd5e1; text-decoration: none; }
+    .footer a:hover { color: #ffffff; }
+    .company-name { color: #ffffff; font-weight: 600; margin-bottom: 8px; }
 
-Interview details:
-- Date / Start: {{interview_start_date_time}}
-- Date / End:   {{interview_end_date_time}}
-- Timezone:     {{timezone}}
-- Job Requisition: {{job_requisition_id}}
-- Application ID:  {{application_id}}
-- Schedule ID:     {{schedule_id}}
-- Recipient:       {{recipient_email}}
+    @media screen and (max-width: 480px) {
+      .header { padding: 24px 20px; }
+      .header h1 { font-size: 20px; }
+      .content { padding: 24px; }
+      .detail-item { flex-direction: column; }
+      .detail-label { min-width: auto; margin-bottom: 4px; }
+      .btn { display: block; width: 100%; margin-bottom: 12px; }
+      .secondary-btn { margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div style="padding: 20px; background: #f8fafc;">
+    <div class="email-wrapper">
+      <div class="header">
+        <h1>You're Invited to Interview!</h1>
+        <p>We're excited to learn more about you</p>
+      </div>
+      
+      <div class="content">
+        <p class="greeting">Hello {{full_name}},</p>
+        
+        <p class="intro">Thank you for your interest in joining our team! We were impressed by your application and would like to invite you to interview for the position of <strong>{{job_requisition_title}}</strong>.</p>
+        
+        <div class="interview-card">
+          <div class="interview-title">Interview Details</div>
+          
+          <div class="detail-item">
+            <div class="detail-label">Date & Time:</div>
+            <div class="detail-value">{{interview_start_date_time}} - {{interview_end_date_time}} ({{timezone}})</div>
+          </div>
+          
+          <div class="detail-item">
+            <div class="detail-label">Position:</div>
+            <div class="detail-value">{{job_requisition_title}}</div>
+          </div>
+          
+          <div class="detail-item">
+            <div class="detail-label">Application ID:</div>
+            <div class="detail-value">{{application_id}}</div>
+          </div>
+        </div>
 
-Please check your application dashboard for further details: {{dashboard_url}}
+        {{#if has_meeting_link}}
+        <div class="virtual-section">
+          <div class="section-title">Virtual Interview</div>
+          <p style="margin: 0 0 16px 0; color: #475569;">This will be a virtual interview. Click the button below to join the meeting:</p>
+          <div style="text-align: center;">
+            <a href="{{meeting_link}}" class="btn">Join Virtual Interview</a>
+          </div>
+          <p style="margin: 12px 0 0 0; font-size: 13px; color: #64748b; text-align: center;">
+            You can also use this link: <a href="{{meeting_link}}" style="color: #3b82f6; word-break: break-all;">{{meeting_link}}</a>
+          </p>
+        </div>
+        {{/if}}
 
-{{#if has_meeting_link}}
-Meeting link: {{meeting_link}}
-{{/if}}
+        {{#if has_address}}
+        <div class="location-section">
+          <div class="section-title">In-Person Interview</div>
+          <p style="margin: 0 0 12px 0; color: #475569; font-weight: 500;">Location:</p>
+          <p style="margin: 0; color: #1e293b; font-size: 15px; background: white; padding: 12px; border-radius: 4px;">{{interview_address}}</p>
+        </div>
+        {{/if}}
 
-{{#if has_address}}
-Address: {{interview_address}}
-{{/if}}
+        {{#if message}}
+        <div class="instructions">
+          <strong>Additional Instructions:</strong><br>
+          {{message}}
+        </div>
+        {{/if}}
 
-Best regards,
-Hiring Team
-`,
+        <div class="action-section">
+          <div class="action-title">Manage Your Interview</div>
+          <p style="margin: 0 0 20px 0; color: #475569; font-size: 14px;">View your application details or reschedule if needed</p>
+          <a href="{{dashboard_url}}" class="btn">View Application Dashboard</a>
+        </div>
+
+        <p style="margin: 32px 0 16px 0; color: #475569; font-size: 14px;">
+          We look forward to speaking with you!<br>
+          <strong>Best regards,</strong><br>
+          The {{company_name}} Hiring Team
+        </p>
+      </div>
+      
+      <div class="footer">
+        <div class="company-name">{{company_name}}</div>
+        <p style="margin: 8px 0; font-size: 13px;">
+          This is an automated message. If you have any questions or need to reschedule,<br>
+          please contact <a href="mailto:{{support_email}}">{{support_email}}</a>
+        </p>
+        <p style="margin: 16px 0 0 0; font-size: 12px; color: #64748b;">
+          Application ID: {{application_id}} • Schedule ID: {{schedule_id}}
+        </p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>`,
         language: 'en',
         isActive: true,
         tenantId: 'global',
@@ -1573,9 +1684,11 @@ Hiring Team
         event_type: 'interview.scheduled',
         data: {
           application_id: 'app-test-67890',
+          dashboard_url: 'https://inboxquality.com',
           full_name: 'Jane Doe',
-          email: 'tonna.ezugwu@prolianceltd.com',
+          email: 'tegaokorare91@gmail.com',
           job_requisition_id: 'job-67890',
+          job_requisition_title: 'HR Personel',
           status: 'scheduled',
           interview_start_date_time: '2025-09-19T10:00:00+01:00',
           interview_end_date_time: '2025-09-19T11:00:00+01:00',

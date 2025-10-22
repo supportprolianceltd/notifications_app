@@ -559,6 +559,7 @@ export class EventsService {
             job_requisition_id: event.data.job_requisition_id,
             job_requisition_title: event.data.job_requisition_title,
             application_id: event.data.application_id,
+            dashboard_url: event.data.dashboard_url,
             status: event.data.status,
             interview_start_date_time: event.data.interview_start_date_time,
             interview_end_date_time: event.data.interview_end_date_time,
