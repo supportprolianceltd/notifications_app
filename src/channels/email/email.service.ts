@@ -228,6 +228,9 @@ export class EmailService {
       const mailOptions = {
         from: `${fromName} <${fromEmail}>`,
         to,
+        headers: {
+          'X-SES-CONFIGURATION-SET': 'system-emails-config',
+        },
         subject: finalSubject,
         html,
       };
