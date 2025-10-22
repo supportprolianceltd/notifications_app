@@ -55,12 +55,12 @@ async function testDatabase() {
       await prisma.tenantEmailProvider.update({
         where: { id: existingEmailProvider.id },
         data: {
-          host: process.env.SMTP_HOST || 'email-smtp.eu-west-2.amazonaws.com',
+          host: process.env.SMTP_HOST,
           port: parseInt(process.env.SMTP_PORT || '465'),
           secure: process.env.SMTP_SECURE === 'true',
-          username: process.env.SMTP_USER || 'AKIAQQPIOM5KEYH7UZWS',
-          password: process.env.SMTP_PASS || 'BOh5oE1xO9F7gQA5CkgCPvlaZSmIez1GCLoLFsUlBGC9',
-          fromEmail: process.env.FROM_EMAIL || 'no-reply@e3os.co.uk',
+          username: process.env.SMTP_USER,
+          password: process.env.SMTP_PASS,
+          fromEmail: process.env.FROM_EMAIL,
           fromName: process.env.FROM_NAME || 'E3OS',
           isDefault: true,
         },
