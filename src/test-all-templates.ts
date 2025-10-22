@@ -1686,7 +1686,7 @@ async function testAllTemplates() {
           application_id: 'app-test-67890',
           dashboard_url: 'https://inboxquality.com',
           full_name: 'Jane Doe',
-          email: 'tegaokorare91@gmail.com',
+          email: 'support@prolianceltd.com',
           job_requisition_id: 'job-67890',
           job_requisition_title: 'HR Personel',
           status: 'scheduled',
