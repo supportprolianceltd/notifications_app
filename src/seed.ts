@@ -7,6 +7,20 @@ async function testDatabase() {
   const prisma = new PrismaClient();
 
   try {
+    await prisma.$connect();
+    console.log('✅ Connected to database successfully');
+
+    // Clean up existing notifications and tenant email provider configs
+    console.log('\n🧹 Cleaning up existing notifications and tenant email providers...');
+    const deletedNotifications = await prisma.notification.deleteMany({});
+    console.log(`   ✅ Deleted notifications: ${deletedNotifications.count}`);
+    const deletedEmailProviders = await prisma.tenantEmailProvider.deleteMany({});
+    console.log(`   ✅ Deleted tenant email providers: ${deletedEmailProviders.count}`);
+    const deletedTenantBrands = await prisma.tenantBrand.deleteMany({});
+    console.log(` ✅ Deleted tenant brands: ${deletedTenantBrands.count}`)
+    const deletedConfig = await prisma.tenantConfig.deleteMany({});
+    console.log(` ✅ Deleted tenant configs: ${deletedConfig.count}`)
+
     // Ensure global tenant exists for global templates
     await prisma.tenant.upsert({
       where: { id: 'global' },
@@ -17,8 +31,6 @@ async function testDatabase() {
       },
     });
     console.log('   ✅ Global tenant created/ensured');
-    await prisma.$connect();
-    console.log('✅ Connected to database successfully');
 
     // Test basic operations
     console.log('\n📊 Testing basic operations:');
