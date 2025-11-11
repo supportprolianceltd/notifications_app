@@ -718,7 +718,6 @@ async function testAllTemplates() {
       .content { padding: 24px; }
       .detail-item { flex-direction: column; }
       .detail-label { min-width: auto; margin-bottom: 4px; }
-      .btn { display: block; width: 100%; margin-bottom: 12px; }
       .secondary-btn { margin-left: 0; }
     }
   </style>
@@ -1568,6 +1567,94 @@ async function testAllTemplates() {
         isActive: true,
         tenantId: 'global',
       },
+
+      // Rostering
+            {
+        id: 'carer-assigned-to-cluster',
+        name: 'carer-assigned-to-cluster',
+        description: 'Notification sent when a carer has been assigned to a new cluster',
+        type: 'email',
+        subject: 'New cluster assignment',
+        body: `<html>
+              <head>
+                  <meta charset="utf-8">
+                  <style>
+                    body { 
+                      font-family: Arial, sans-serif; 
+                      line-height: 1.6; 
+                      color: #333; 
+                      max-width: 600px; 
+                      margin: 0 auto; 
+                      padding: 20px; 
+                    }
+                    .container { 
+                      background: #fff; 
+                      padding: 30px; 
+                      border: 1px solid #00A300; 
+                      border-radius: 5px; 
+                    }
+                    .header { 
+                      border-bottom: 2px solid #00A300; 
+                      padding-bottom: 15px; 
+                      margin-bottom: 20px; 
+                      text-align: center;
+                    }
+                    .details { 
+                      background: #B8FFB8; 
+                      padding: 20px; 
+                      border-radius: 5px; 
+                      margin: 20px 0; 
+                      border-left: 4px solid #004700;
+                    }
+                    .urgent-action {
+                      background: #fff3cd;
+                      border: 1px solid #ffeaa7;
+                      padding: 20px;
+                      border-radius: 5px;
+                      border-left: 4px solid #ffc107;
+                      margin: 20px 0;
+                    }
+                    .action-list {
+                      background: #d1ecf1;
+                      padding: 15px;
+                      border-radius: 5px;
+                      margin: 15px 0;
+                    }
+                  </style>
+              </head>
+              <body>
+                  <div class="container">
+                    <div class="header">
+                      <h2 style="color: #00A300; margin: 0;">New Cluster Assignmet</h2>
+                    </div>
+                    
+                    <p>Dear {{carer_name}},</p>
+                    
+                    <p><strong>This is to notify you that you have been assigned to a new cluster, below are the details of your new cluster.</p>
+                    
+                    <div class="details">
+                      <h4 style="color: #004700; margin-top: 0;">Cluster Details</h4>
+                      <p><strong>Cluster name:</strong> {{cluster_name}}</p>
+                      <p><strong>Cluster Location:</strong> {{cluster_location}}</p>
+                      <p><strong>Cluster Postcode:</strong> {{cluster_postcode}}</p>
+                    </div>
+                    
+                    {{#if message}}
+                    <div class="urgent-action">
+                      <h4 style="color: #856404; margin-top: 0;">💬 Important Message</h4>
+                      <p style="margin-bottom: 0;">{{message}}</p>
+                    </div>
+                    {{/if}}
+                    
+                    <p>Best regards,<br>
+                    <strong>HR Team</strong></p>
+                  </div>
+              </body>
+              </html>`,
+        language: 'en',
+        isActive: true,
+        tenantId: 'global',
+      },
     ];
 
     // Create all templates
@@ -1740,19 +1827,19 @@ async function testAllTemplates() {
       // },
 ];
 
-    for (const testEvent of testEvents) {
-      const job = await eventsQueue.add(testEvent.event_type, {
-        metadata: {
-          event_id: 'test-' + Date.now(),
-          event_type: testEvent.event_type,
-          created_at: new Date().toISOString(),
-          source: 'test-script',
-          tenant_id: 'global',
-        },
-        data: testEvent.data,
-      });
-      console.log(`   ✅ Added test event: ${testEvent.event_type} (Job ID: ${job.id})`);
-    }
+    // for (const testEvent of testEvents) {
+    //   const job = await eventsQueue.add(testEvent.event_type, {
+    //     metadata: {
+    //       event_id: 'test-' + Date.now(),
+    //       event_type: testEvent.event_type,
+    //       created_at: new Date().toISOString(),
+    //       source: 'test-script',
+    //       tenant_id: 'global',
+    //     },
+    //     data: testEvent.data,
+    //   });
+    //   console.log(`   ✅ Added test event: ${testEvent.event_type} (Job ID: ${job.id})`);
+    // }
 
     console.log('\n👀 Now check your NestJS application logs to see if all templates work!');
     console.log('⏳ Waiting 5 seconds for processing...');

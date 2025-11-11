@@ -2,11 +2,10 @@
 import { Global, Module } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { TemplatesService } from '../templates/templates.service';
-import { NotificationsService } from '../notifications/notifications.service';
 
-@Global() // Make this module global so all other modules can access its providers
+@Global() // Make this module global so other modules can access core providers
 @Module({
-  providers: [PrismaService, TemplatesService, NotificationsService],
-  exports: [PrismaService, TemplatesService, NotificationsService],
+  providers: [PrismaService, TemplatesService],
+  exports: [PrismaService, TemplatesService],
 })
 export class CoreModule {}
