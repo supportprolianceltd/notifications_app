@@ -1,5 +1,7 @@
 // app.module.ts
 import { Module } from '@nestjs/common';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 import { BullModule } from '@nestjs/bullmq';
 import { AppConfigModule } from './config/config.module';
 import { AppConfigService } from './config/config.service';
@@ -24,8 +26,13 @@ import { MetricsModule } from './metrics/metrics.module';
 
 @Module({
   imports: [
-    AppConfigModule,
-    CoreModule,
+    // Serve files in ./public at /static
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public'),
+      serveRoot: '/static',
+    }),
+  AppConfigModule,
+  CoreModule,
     BullModule.forRootAsync({
       imports: [AppConfigModule],
       useFactory: (configService: AppConfigService) => ({
@@ -37,12 +44,14 @@ import { MetricsModule } from './metrics/metrics.module';
       inject: [AppConfigService],
     }),
     EventsModule,
+  // Notifications (in-app) module
+  require('./notifications/notifications.module').NotificationsModule,
     EmailModule,
     MetricsModule,
     TenantsModule,
     JobsModule,
   ],
-  providers: [TenantBrandingService, TenantConfigService, TenantEmailProvidersService, UserPreferencesService, NotificationsService, TemplatesService],
-  controllers: [TenantBrandingController, TenantConfigController, TenantEmailProvidersController, UserPreferencesController, NotificationsController, TemplatesController]
+  providers: [TenantBrandingService, TenantConfigService, TenantEmailProvidersService, UserPreferencesService, TemplatesService],
+  controllers: [TenantBrandingController, TenantConfigController, TenantEmailProvidersController, UserPreferencesController, TemplatesController]
 })
 export class AppModule {}

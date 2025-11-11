@@ -2,10 +2,11 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
+import { NotificationsGateway } from './notifications.gateway';
 
 @Injectable()
 export class NotificationsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService, private gateway: NotificationsGateway) {}
   
 
   async createNotificationLog(notificationData: {
@@ -23,9 +24,34 @@ export class NotificationsService {
     templateId?: string;
   }) {
     try {
-      return await this.prisma.notification.create({
-        data: notificationData,
-      });
+      const record = await this.prisma.notification.create({ data: notificationData });
+
+      // Emit real-time event only for in-app notifications
+      try {
+        if (record.userId && record.channel === 'in_app') {
+          const payload = {
+            id: record.id,
+            tenantId: record.tenantId,
+            userId: record.userId,
+            eventType: record.eventType,
+            subject: record.subject,
+            body: record.body,
+            createdAt: record.createdAt,
+            isRead: false,
+          };
+          this.gateway.sendToUser(record.tenantId, record.userId, 'notification.created', payload);
+        } else if (record.userId) {
+          // Skip emitting non in-app channels (e.g., 'email') to prevent duplicate realtime messages
+          // Useful for debugging — keep a debug log in case developers need to trace emits
+          // Note: don't throw; this is intentional behaviour
+          // console.debug(`Skipping realtime emit for notification ${record.id} with channel=${record.channel}`);
+        }
+      } catch (emitErr) {
+        // Don't fail the DB write if emitting fails
+        console.error('Failed to emit notification over gateway:', emitErr?.message || emitErr);
+      }
+
+      return record;
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         // Handle known Prisma errors
@@ -53,16 +79,41 @@ export class NotificationsService {
     }
   }
 
-  async getNotificationLogsForUser(tenantId: string, userId: string) {
+  async markAsRead(id: string, userId: string) {
+    const updated = await this.prisma.notification.updateMany({
+      where: { id, userId },
+      data: { isRead: true, readAt: new Date() },
+    });
+    return updated.count > 0;
+  }
+
+  async markAllAsRead(tenantId: string, userId: string) {
+    const updated = await this.prisma.notification.updateMany({
+      where: { tenantId, userId, isRead: false },
+      data: { isRead: true, readAt: new Date() },
+    });
+    return updated.count;
+  }
+
+  async getUnreadCount(tenantId: string, userId: string) {
+    const count = await this.prisma.notification.count({ where: { tenantId, userId, isRead: false } });
+    return count;
+  }
+
+  async getNotificationLogsForUser(tenantId: string, userId: string, channel?: string) {
+    const where: any = { tenantId, userId };
+    if (channel) where.channel = channel;
     return this.prisma.notification.findMany({
-      where: { tenantId, userId },
+      where,
       orderBy: { createdAt: 'desc' },
     });
   }
 
-  async getNotificationLogsForTenant(tenantId: string) {
+  async getNotificationLogsForTenant(tenantId: string, channel?: string) {
+    const where: any = { tenantId };
+    if (channel) where.channel = channel;
     return this.prisma.notification.findMany({
-      where: { tenantId },
+      where,
       orderBy: { createdAt: 'desc' },
     });
   }

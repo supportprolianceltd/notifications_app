@@ -134,6 +134,8 @@ model Notification {
   channel   String   // 'email', 'sms', 'push'
   eventType String   // e.g., 'user.registration.completed'
   status    String   // 'queued', 'sent', 'delivered', 'failed'
+  isRead    Boolean  @default(false)
+  readAt    DateTime?
   subject   String?
   body      String?
 

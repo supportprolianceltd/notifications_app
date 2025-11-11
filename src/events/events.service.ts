@@ -6,6 +6,7 @@ import { IncomingEventDto } from './dto/incoming-event.dto';
 import { validate } from 'class-validator';
 import { plainToInstance } from 'class-transformer';
 import { TenantsService } from '../tenants/tenants.service';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class EventsService {
@@ -14,6 +15,7 @@ export class EventsService {
   constructor(
     @InjectQueue('email') private readonly emailQueue: Queue, // Inject the email queue
     private readonly tenantsService: TenantsService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async handleEvent(eventData: any): Promise<string[]> {
@@ -149,6 +151,55 @@ export class EventsService {
           jobIds = await this.handleDocumentExpired(event);
           break;
 
+        case 'rostering.cluster.created':
+          jobIds = await this.handleRosteringClusterCreted(event);
+          break;
+
+        case 'rostering.request.received':
+          jobIds = await this.handleRosteringRequestReceived(event);
+          break;
+
+        case 'rostering.careplan.created':
+          jobIds = await this.handleRoasteringCareplanCreated(event);
+          break;
+
+        // Additional rostering / care events
+        case 'rostering.careplan.updated':
+          jobIds = await this.handleCareplanUpdated(event);
+          break;
+
+        case 'rostering.cluster.updated':
+          jobIds = await this.handleClusterUpdated(event);
+          break;
+
+        case 'rostering.careplan.deleted':
+          jobIds = await this.handleCareplanDeleted(event);
+          break;
+
+        case 'rostering.cluster.deleted':
+          jobIds = await this.handleClusterDeleted(event);
+          break;
+
+        case 'rostering.carer.assigned':
+          jobIds = await this.handleCarerAssignedToCluster(event);
+          break;
+
+        case 'rostering.client.assigned':
+          jobIds = await this.handleClientAssignedToCluster(event);
+          break;
+
+        case 'rostering.caretask.created':
+          jobIds = await this.handleCareTaskCreated(event);
+          break;
+
+        case 'rostering.caretask.updated':
+          jobIds = await this.handleCareTaskUpdated(event);
+          break;
+
+        case 'rostering.caretask.deleted':
+          jobIds = await this.handleCareTaskDeleted(event);
+          break;
+
         // TODO: Add more cases for other event types
         default:
           this.logger.warn(`Unhandled event type: ${event.metadata.event_type}`);
@@ -231,6 +282,24 @@ export class EventsService {
       tenantId: event.metadata.tenant_id,
       eventType: event.metadata.event_type,
     });
+    // Create in-app notification
+    try {
+      await this.notificationsService.createNotificationLog({
+        tenantId: event.metadata.tenant_id,
+        userId: event.data.user_id,
+        userEmail: event.data.user_email,
+        userName: event.data.user_name,
+        channel: 'in_app',
+        eventType: event.metadata.event_type,
+        status: 'queued',
+        subject: 'Login successful',
+        body: `A login to your account occurred at ${event.data.timestamp} from ${event.data.ip_address}`,
+        templateId: 'template-login-succeeded',
+      });
+    } catch (err) {
+      this.logger.error('Failed to create in-app notification for login succeeded', err.stack || err.message);
+    }
+
     return job.id ? [job.id] : [];
   }
 
@@ -467,6 +536,109 @@ export class EventsService {
       return job.id ? [job.id] : [];
     }
 
+    // --- Rostering / care event handlers (stubs) ---
+
+    private async handleRosteringClusterCreted(event: IncomingEventDto): Promise<string[]> {
+      this.logger.log(`Handling rostering cluster created ${event.metadata.tenant_id}`);
+      // Implement logic: enqueue notifications or audit logs as needed
+      return [];
+    }
+    private async handleRosteringRequestReceived(event: IncomingEventDto): Promise<string[]> {
+      this.logger.log(`Handling rostering request received ${event.metadata.tenant_id}`);
+      // Implement logic: enqueue notifications or audit logs as needed
+      return [];
+    }
+    private async handleRoasteringCareplanCreated(event: IncomingEventDto): Promise<string[]> {
+      this.logger.log(`Handling careplan created ${event.metadata.tenant_id}`);
+      const job = await this.emailQueue.add('2fa-attempt-failed', {
+        to: event.data.staff_email,
+        subject: 'Care plan created',
+        template: 'rostering-careplan-created',
+        context: {
+          client_email: event.data.client_email,
+          staff_email: event.data.staff_email,
+          client_name: event.data.client_name,
+          user_id: event.data.user_id,
+        },
+        tenantId: event.metadata.tenant_id,
+        eventType: event.metadata.event_type,
+      });
+      return job.id ? [job.id] : [];
+      // Implement logic: enqueue notifications or audit logs as needed
+      return [];
+    }
+    private async handleCareplanUpdated(event: IncomingEventDto): Promise<string[]> {
+      this.logger.log(`Handling careplan updated for tenant ${event.metadata.tenant_id}`);
+      // Implement logic: enqueue notifications or audit logs as needed
+      const job = await this.emailQueue.add('2fa-attempt-failed', {
+        to: event.data.staff_email,
+        subject: 'Care plan updated',
+        template: 'rostering-careplan-updated',
+        context: {
+          client_email: event.data.client_email,
+          staff_email: event.data.staff_email,
+          client_name: event.data.client_name,
+          user_id: event.data.user_id,
+        },
+        tenantId: event.metadata.tenant_id,
+        eventType: event.metadata.event_type,
+      });
+      return job.id ? [job.id] : [];
+    }
+
+    private async handleClusterUpdated(event: IncomingEventDto): Promise<string[]> {
+      this.logger.log(`Handling cluster updated for tenant ${event.metadata.tenant_id}`);
+      return [];
+    }
+
+    private async handleCareplanDeleted(event: IncomingEventDto): Promise<string[]> {
+      this.logger.log(`Handling careplan deleted for tenant ${event.metadata.tenant_id}`);
+      return [];
+    }
+
+    private async handleClusterDeleted(event: IncomingEventDto): Promise<string[]> {
+      this.logger.log(`Handling cluster deleted for tenant ${event.metadata.tenant_id}`);
+      return [];
+    }
+
+    private async handleCarerAssignedToCluster(event: IncomingEventDto): Promise<string[]> {
+      this.logger.log(`Handling carer assigned to cluster for tenant ${event.metadata.tenant_id}`);
+      const job = await this.emailQueue.add('2fa-code-requested', {
+        to: event.data.user_email,
+        subject: 'You have been assigned to a new cluster',
+        template: 'carer-assigned-to-cluster',
+        context: {
+          user_id: event.data.user_id,
+          user_email: event.data.user_email,
+          cluster_name: event.data.cluster_name,
+          carer_name: event.data.carer_name,
+        },
+        tenantId: event.metadata.tenant_id,
+        eventType: event.metadata.event_type,
+      });
+      return job.id ? [job.id] : [];
+    }
+
+    private async handleClientAssignedToCluster(event: IncomingEventDto): Promise<string[]> {
+      this.logger.log(`Handling client assigned to cluster for tenant ${event.metadata.tenant_id}`);
+      return [];
+    }
+
+    private async handleCareTaskCreated(event: IncomingEventDto): Promise<string[]> {
+      this.logger.log(`Handling care task created for tenant ${event.metadata.tenant_id}`);
+      return [];
+    }
+
+    private async handleCareTaskUpdated(event: IncomingEventDto): Promise<string[]> {
+      this.logger.log(`Handling care task updated for tenant ${event.metadata.tenant_id}`);
+      return [];
+    }
+
+    private async handleCareTaskDeleted(event: IncomingEventDto): Promise<string[]> {
+      this.logger.log(`Handling care task deleted for tenant ${event.metadata.tenant_id}`);
+      return [];
+    }
+
     private async handleTwoFactorAttemptFailed(event: IncomingEventDto): Promise<string[]> {
       const job = await this.emailQueue.add('2fa-attempt-failed', {
         to: event.data.user_email,
@@ -544,6 +716,24 @@ export class EventsService {
         });
 
         this.logger.log(`📧 Added candidate shortlisted email to queue for: ${event.data.email}`);
+        // Create in-app notification
+        try {
+          await this.notificationsService.createNotificationLog({
+            tenantId: event.metadata.tenant_id,
+            userId: event.data.application_id,
+            userEmail: event.data.email,
+            userName: event.data.full_name,
+            channel: 'in_app',
+            eventType: event.metadata.event_type,
+            status: 'queued',
+            subject: 'You have been shortlisted',
+            body: `Congratulations! You have been shortlisted for ${event.data.job_requisition_id}`,
+            templateId: 'template-candidate-shortlisted',
+          });
+        } catch (err) {
+          this.logger.error('Failed to create in-app notification for shortlisted candidate', err.stack || err.message);
+        }
+
         return job.id ? [job.id] : [];
       }
 
@@ -577,6 +767,24 @@ export class EventsService {
         });
 
         this.logger.log(`📧 Added interview scheduled email to queue for: ${event.data.email}`);
+        // Create in-app notification
+        try {
+          await this.notificationsService.createNotificationLog({
+            tenantId: event.metadata.tenant_id,
+            userId: event.data.application_id,
+            userEmail: event.data.email,
+            userName: event.data.full_name,
+            channel: 'in_app',
+            eventType: event.metadata.event_type,
+            status: 'queued',
+            subject: 'Interview scheduled',
+            body: `Your interview for ${event.data.job_requisition_title} is scheduled on ${event.data.interview_start_date_time}`,
+            templateId: 'template-interview-scheduled',
+          });
+        } catch (err) {
+          this.logger.error('Failed to create in-app notification for interview scheduled', err.stack || err.message);
+        }
+
         return job.id ? [job.id] : [];
       }
 
@@ -703,6 +911,24 @@ export class EventsService {
         });
 
         this.logger.log(`📧 Added document expiry email to queue for: ${user_email}`);
+        // Create in-app notification
+        try {
+          await this.notificationsService.createNotificationLog({
+            tenantId: event.metadata.tenant_id,
+            userId: user_email, // if userId unknown, store email as userId for tracking or keep userId empty
+            userEmail: user_email,
+            userName: full_name,
+            channel: 'in_app',
+            eventType: event.metadata.event_type,
+            status: 'queued',
+            subject,
+            body: `Your ${document_type} will expire on ${expiry_date}`,
+            templateId: 'template-document-expiry',
+          });
+        } catch (err) {
+          this.logger.error('Failed to create in-app notification for document expiry', err.stack || err.message);
+        }
+
         return job.id ? [job.id] : [];
       }
 

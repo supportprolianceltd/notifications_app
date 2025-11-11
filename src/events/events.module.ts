@@ -3,6 +3,7 @@ import { BullModule } from '@nestjs/bullmq'; // Import BullModule
 import { EventsService } from './events.service';
 import { EventsProcessor } from './events.processor';
 import { EmailModule } from 'src/channels/email/email.module';
+import { NotificationsModule } from 'src/notifications/notifications.module';
 import { EventsController } from './events.controller';
 import { TenantsModule } from '../tenants/tenants.module';
 
@@ -13,6 +14,7 @@ import { TenantsModule } from '../tenants/tenants.module';
       name: 'events',
     }),
     EmailModule,
+  NotificationsModule,
     TenantsModule
   ],
   providers: [EventsService, EventsProcessor],

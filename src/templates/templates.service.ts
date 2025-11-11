@@ -1,9 +1,18 @@
 // src/templates/templates.service.ts
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class TemplatesService {
+  private readonly logger = new Logger(TemplatesService.name);
+
+  private static readonly DEFAULT_BRANDING = {
+    companyName: 'E3OS',
+    logoUrl: null,
+    primaryColor: '#000000',
+    supportEmail: 'info@e3os.co.uk',
+  };
+
   constructor(private prisma: PrismaService) {}
 
   async findTemplate(tenantId: string, name: string, type: string = 'email') {
@@ -27,27 +36,10 @@ export class TemplatesService {
   }
 
   async getTenantBranding(tenantId: string) {
-    console.log('TENANT ID IN GET BRANDING:', tenantId); // ← Debug
+    this.logger.debug(`Getting branding for tenant: ${tenantId}`);
     try {
-      const branding = await this.prisma.tenantBrand.findUnique({
-        where: { tenantId },
-      });
-      
-      if (!branding) {
-        return {
-          companyName: 'Default Company',
-          logoUrl: null,
-          primaryColor: '#000000',
-          supportEmail: 'notification@temp.artstraining.co.uk',
-        };
-      }
-      
-      return branding ?? {
-          companyName: 'Default Company',
-          logoUrl: null,
-          primaryColor: '#000000',
-          supportEmail: 'notification@temp.artstraining.co.uk',
-        };
+      const branding = await this.prisma.tenantBrand.findUnique({ where: { tenantId } });
+      return branding ?? TemplatesService.DEFAULT_BRANDING;
     } catch (error) {
       throw new Error(`Failed to get tenant branding: ${error.message}`);
     }
