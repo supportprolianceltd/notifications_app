@@ -1827,19 +1827,19 @@ async function testAllTemplates() {
       // },
 ];
 
-    // for (const testEvent of testEvents) {
-    //   const job = await eventsQueue.add(testEvent.event_type, {
-    //     metadata: {
-    //       event_id: 'test-' + Date.now(),
-    //       event_type: testEvent.event_type,
-    //       created_at: new Date().toISOString(),
-    //       source: 'test-script',
-    //       tenant_id: 'global',
-    //     },
-    //     data: testEvent.data,
-    //   });
-    //   console.log(`   ✅ Added test event: ${testEvent.event_type} (Job ID: ${job.id})`);
-    // }
+    for (const testEvent of testEvents) {
+      const job = await eventsQueue.add(testEvent.event_type, {
+        metadata: {
+          event_id: 'test-' + Date.now(),
+          event_type: testEvent.event_type,
+          created_at: new Date().toISOString(),
+          source: 'test-script',
+          tenant_id: 'global',
+        },
+        data: testEvent.data,
+      });
+      console.log(`   ✅ Added test event: ${testEvent.event_type} (Job ID: ${job.id})`);
+    }
 
     console.log('\n👀 Now check your NestJS application logs to see if all templates work!');
     console.log('⏳ Waiting 5 seconds for processing...');
