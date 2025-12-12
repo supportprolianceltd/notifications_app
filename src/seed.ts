@@ -27,7 +27,7 @@ async function testDatabase() {
       update: {},
       create: {
         id: 'global',
-        name: 'Global Tenant',
+        name: 'E30S',
       },
     });
     console.log('   ✅ Global tenant created/ensured');
@@ -234,6 +234,37 @@ async function testDatabase() {
     }
 
     // Query to verify data
+    // --- Ensure production tenant has all templates ---
+    // --- Ensure all tenants have all templates ---
+    const tenants = await prisma.tenant.findMany({ where: { id: { not: 'global' } } });
+    const globalTemplates = await prisma.template.findMany({ where: { tenantId: 'global' } });
+    for (const tenant of tenants) {
+      console.log(`\n🔄 Ensuring templates for tenant (${tenant.id})...`);
+      for (const globalTemplate of globalTemplates) {
+        const exists = await prisma.template.findFirst({
+          where: {
+            tenantId: tenant.id,
+            name: globalTemplate.name,
+            language: globalTemplate.language,
+          },
+        });
+        if (!exists) {
+          await prisma.template.create({
+            data: {
+              ...globalTemplate,
+              id: undefined, // Let Prisma auto-generate ID
+              tenantId: tenant.id,
+              createdAt: undefined,
+              updatedAt: undefined,
+            },
+          });
+          console.log(`   ✅ Copied template '${globalTemplate.name}' to tenant ${tenant.id}`);
+        } else {
+          console.log(`   ⏩ Template '${globalTemplate.name}' already exists for tenant ${tenant.id}, skipping.`);
+        }
+      }
+    }
+
     console.log('\n📊 Database Summary:');
     const templates = await prisma.template.findMany();
     console.log(`   📋 Total templates: ${templates.length}`);

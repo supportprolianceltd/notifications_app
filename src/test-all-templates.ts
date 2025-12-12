@@ -104,20 +104,42 @@ async function testAllTemplates() {
         body: `<!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8">
-    <style>body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f6fb; margin: 0; padding: 0; }
+    .container { max-width: 600px; margin: 40px auto; background: #fff; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); overflow: hidden; }
+    .header { background: {{primary_color}}; color: #fff; padding: 32px 24px 20px 24px; text-align: center; }
+    .header h1 { margin: 0; font-size: 2rem; letter-spacing: 1px; }
+    .content { padding: 32px 24px 24px 24px; }
+    .details { background: #f7f9fc; border-radius: 8px; padding: 18px 20px; margin: 24px 0; }
+    .details li { margin-bottom: 8px; }
+    .footer { background: #f4f6fb; color: #888; text-align: center; font-size: 13px; padding: 18px 24px; border-top: 1px solid #eaeaea; }
+    @media (max-width: 600px) {
+      .container, .content, .header, .footer { padding-left: 10px; padding-right: 10px; }
+    }
+  </style>
 </head>
 <body>
-    <h2>Hello {{user_name}}!</h2>
-    <p>Your account was successfully accessed:</p>
-    <ul>
+  <div class="container">
+    <div class="header">
+      <h1>Login Successful</h1>
+    </div>
+    <div class="content">
+      <p style="font-size: 1.1rem;">Hello <strong>{{user_name}}</strong>,</p>
+      <p>Your account was just accessed. Here are the details:</p>
+      <ul class="details">
         <li><strong>Time:</strong> {{timestamp}}</li>
         <li><strong>IP Address:</strong> {{ip_address}}</li>
         <li><strong>Device:</strong> {{user_agent}}</li>
-    </ul>
-    <p>If this was not you, please secure your account immediately.</p>
-    <br>
-    <p>Best regards,<br>The {{company_name}} Team</p>
+      </ul>
+      <p style="color: #d9534f; margin-top: 18px;">If this wasn't you, please <a href="{{security_link}}" style="color: #d9534f; text-decoration: underline;">secure your account</a> immediately.</p>
+      <p style="margin-top: 32px;">Best regards,<br><strong>The {{company_name}} Team</strong></p>
+    </div>
+    <div class="footer">
+      &copy; {{current_year}} {{company_name}}. All rights reserved.
+    </div>
+  </div>
 </body>
 </html>`,
         language: 'en',
@@ -388,21 +410,47 @@ async function testAllTemplates() {
         body: `<!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8">
-    <style>body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f6fb; margin: 0; padding: 0; }
+    .container { max-width: 600px; margin: 40px auto; background: #fff; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); overflow: hidden; }
+    .header { background: {{primary_color}}; color: #fff; padding: 32px 24px 20px 24px; text-align: center; }
+    .header h1 { margin: 0; font-size: 2rem; letter-spacing: 1px; }
+    .content { padding: 32px 24px 24px 24px; }
+    .code-box { background: #f7f9fc; border-radius: 8px; padding: 18px 0; margin: 24px 0; text-align: center; }
+    .code { font-size: 2.2rem; letter-spacing: 6px; color: #2d7ff9; font-weight: bold; }
+    .details { background: #f7f9fc; border-radius: 8px; padding: 14px 20px; margin: 18px 0; }
+    .details li { margin-bottom: 8px; }
+    .footer { background: #f4f6fb; color: #888; text-align: center; font-size: 13px; padding: 18px 24px; border-top: 1px solid #eaeaea; }
+    @media (max-width: 600px) {
+      .container, .content, .header, .footer { padding-left: 10px; padding-right: 10px; }
+    }
+  </style>
 </head>
 <body>
-    <h2>Verification Code</h2>
-    <p>Your verification code is: <strong style="font-size: 24px; letter-spacing: 3px;">{{code}}</strong></p>
-    <p>This code will expire in {{expires_in_seconds}} seconds.</p>
-    <p><strong>Login attempt details:</strong></p>
-    <ul>
-        <li>IP Address: {{ip_address}}</li>
-        <li>Device: {{user_agent}}</li>
-    </ul>
-    <p>If you did not request this code, please secure your account immediately.</p>
-    <br>
-    <p>Best regards,<br>The {{company_name}} Security Team</p>
+  <div class="container">
+    <div class="header">
+      <h1>Verification Code</h1>
+    </div>
+    <div class="content">
+      <p style="font-size: 1.1rem;">Hello,</p>
+      <p>Your verification code is:</p>
+      <div class="code-box">
+        <span class="code">{{code}}</span>
+      </div>
+      <p>This code will expire in <strong>{{expires_in_seconds}}</strong> seconds.</p>
+      <ul class="details">
+        <li><strong>IP Address:</strong> {{ip_address}}</li>
+        <li><strong>Device:</strong> {{user_agent}}</li>
+      </ul>
+      <p style="color: #d9534f; margin-top: 18px;">If you did not request this code, please <a href="{{security_link}}" style="color: #d9534f; text-decoration: underline;">secure your account</a> immediately.</p>
+      <p style="margin-top: 32px;">Best regards,<br><strong>The {{company_name}} Security Team</strong></p>
+    </div>
+    <div class="footer">
+      &copy; {{current_year}} {{company_name}}. All rights reserved.
+    </div>
+  </div>
 </body>
 </html>`,
         language: 'en',

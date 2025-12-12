@@ -33,19 +33,31 @@ export class EventsService {
     // 2. Validate tenant exists before processing
     const tenantId = event.metadata.tenant_id;
     const tenant = await this.tenantsService.getTenant(tenantId);
+    let usedTenantId = tenantId;
+    let tenantToUse = tenant;
     if (!tenant) {
-      this.logger.error(`❌ Tenant '${tenantId}' does not exist`);
-      throw new BadRequestException(`Tenant '${tenantId}' does not exist`);
+      this.logger.warn(`⚠️ Tenant '${tenantId}' does not exist, falling back to global tenant.`);
+      tenantToUse = await this.tenantsService.getTenant('global');
+      usedTenantId = 'global';
+      if (!tenantToUse) {
+        this.logger.error(`❌ Global tenant does not exist. Cannot process event.`);
+        throw new BadRequestException(`Tenant '${tenantId}' does not exist and no global tenant fallback available`);
+      }
+      // Update event metadata so all downstream logic uses the global tenant
+      if (event && event.metadata) {
+        event.metadata.tenant_id = 'global';
+      }
     }
 
-    this.logger.log(`🎯 Processing event: ${event.metadata.event_type} for tenant: ${tenantId}`);
+    this.logger.log(`🎯 Processing event: ${event.metadata.event_type} for tenant: ${usedTenantId}`);
     this.logger.log(`📊 Event data summary: ${JSON.stringify({
       event_type: event.metadata.event_type,
-      tenant_id: tenantId,
+      tenant_id: usedTenantId,
       created_at: event.metadata.created_at,
       data_keys: Object.keys(event.data || {}),
       recipient_email: event.data?.email || event.data?.user_email || 'N/A'
     }, null, 2)}`);
+    // Optionally, update event.metadata.tenant_id = usedTenantId if you want downstream to see the fallback
 
     // 3. Route the event based on its type
     let jobIds: string[] = [];

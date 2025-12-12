@@ -40,33 +40,43 @@ export class EmailProcessor extends WorkerHost {
 
     try {
       await emailLimiter.consume('global'); // consume 1 point
-      await this.emailService.sendEmail(job.data);
-      jobsProcessedCounter.inc();
-      this.logger.log(`✅ Email sent for job ${job.id}`);
-      return { success: true };
+      try {
+        await this.emailService.sendEmail(job.data);
+        jobsProcessedCounter.inc();
+        this.logger.log(`✅ Email sent for job ${job.id}`);
+        return { success: true };
+      } catch (error) {
+        // If tenant not found, retry with global tenant
+        if (error.name === 'TenantNotFoundError' || (error.message?.includes('Tenant') && error.message?.includes('does not exist'))) {
+          this.logger.warn(`⚠️ Tenant not found for job ${job.id}, retrying with global tenant...`);
+          const globalJobData = { ...job.data, tenantId: 'global' };
+          try {
+            await this.emailService.sendEmail(globalJobData);
+            jobsProcessedCounter.inc({ status: 'fallback', reason: 'used_global_tenant' });
+            this.logger.log(`✅ Email sent for job ${job.id} using global tenant`);
+            return { success: true, fallback: 'global_tenant' };
+          } catch (globalError) {
+            this.logger.error(`❌ Fallback to global tenant failed for job ${job.id}: ${globalError.message}`);
+            jobsProcessedCounter.inc({ status: 'failed', reason: 'global_tenant_failed' });
+            return { success: false, error: globalError.message, reason: 'global_tenant_failed' };
+          }
+        } else if (error instanceof RateLimiterRes) {
+          // Too many emails sent, re-queue or log
+          this.logger.warn('Email rate limit exceeded, delaying job');
+          throw new Error('Email rate limit exceeded, try again later.');
+        }
+        this.logger.error(`❌ Failed email job ${job.id}: ${error.message}`);
+        if (attemptsMade < this.maxRetries) {
+          this.logger.warn(`🔄 Retrying job ${job.id} in ${this.getRetryDelay(attemptsMade)}ms`);
+          throw error; // BullMQ will automatically retry
+        }
+        this.logger.error(`💥 Job ${job.id} failed after ${this.maxRetries} attempts`);
+        jobsProcessedCounter.inc({ status: 'failed', reason: 'max_retries_exceeded' });
+        return { success: false, error: error.message };
+      }
     } catch (error) {
-      // Handle tenant-specific errors - don't retry these
-      if (error.name === 'TenantNotFoundError' || error.message?.includes('Tenant') && error.message?.includes('does not exist')) {
-        this.logger.error(`❌ Job ${job.id} failed - Tenant does not exist: ${error.message}`);
-        this.logger.error(`🚫 Not retrying job ${job.id} - tenant validation error`);
-        jobsProcessedCounter.inc({ status: 'failed', reason: 'tenant_not_found' });
-        return { success: false, error: error.message, reason: 'tenant_not_found', retry: false };
-      } else if(error instanceof RateLimiterRes) {
-         // Too many emails sent, re-queue or log
-        this.logger.warn('Email rate limit exceeded, delaying job');
-        // Optionally: re-queue or delay the job
-        throw new Error('Email rate limit exceeded, try again later.');
-      }
-
-      this.logger.error(`❌ Failed email job ${job.id}: ${error.message}`);
-      
-      if (attemptsMade < this.maxRetries) {
-        this.logger.warn(`🔄 Retrying job ${job.id} in ${this.getRetryDelay(attemptsMade)}ms`);
-        throw error; // BullMQ will automatically retry
-      }
-      
-      this.logger.error(`💥 Job ${job.id} failed after ${this.maxRetries} attempts`);
-      jobsProcessedCounter.inc({ status: 'failed', reason: 'max_retries_exceeded' });
+      this.logger.error(`❌ Unhandled error in email processor for job ${job.id}: ${error.message}`);
+      jobsProcessedCounter.inc({ status: 'failed', reason: 'unhandled_error' });
       return { success: false, error: error.message };
     }
   }
