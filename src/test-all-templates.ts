@@ -76,10 +76,15 @@ async function testAllTemplates() {
       </head>
       <body>
         <div class="container">
-          <h2>Welcome to {{company_name}}, {{user_name}}!</h2>
+          <h2>Welcome to {{company_name}}!</h2>
           <p>Your account has been created by an administrator. You can now log in and start using our platform.</p>
           <div class="info">
-            <p><strong>Email:</strong> {{user_email}}</p>
+            {{#if login_email}}
+            <p><strong>Email:</strong> {{login_email}}</p>
+            {{/if}}
+            {{#if username}}
+            <p><strong>Username:</strong> {{username}}</p>
+            {{/if}}
             {{#if temp_password}}
             <p><strong>Temporary Password:</strong> {{temp_password}}</p>
             {{/if}}
@@ -538,7 +543,7 @@ async function testAllTemplates() {
         tenantId: 'global',
       },
 
-        // Candidate Shortlisted Template
+      // Candidate Shortlisted Template
       {
         id: 'template-candidate-shortlisted',
         name: 'candidate-shortlisted',
@@ -867,7 +872,8 @@ async function testAllTemplates() {
         id: 'template-candidate-shortlisted-gaps',
         name: 'candidate-shortlisted-gaps',
         type: 'email',
-        subject: 'Congratulations! You have been shortlisted - Additional Information Required',
+        subject:
+          'Congratulations! You have been shortlisted - Additional Information Required',
         body: `<!DOCTYPE html>
       <html>
       <head>
@@ -1379,7 +1385,8 @@ async function testAllTemplates() {
       {
         id: 'template-application-submitted',
         name: 'application-submitted',
-        description: 'Notification sent when a candidate submits a job application',
+        description:
+          'Notification sent when a candidate submits a job application',
         type: 'email',
         subject: 'Application Submitted - {{job_requisition_title}}',
         body: `<!DOCTYPE html>
@@ -1426,11 +1433,12 @@ async function testAllTemplates() {
         isActive: true,
         tenantId: 'global',
       },
-          // Document Expiry Template
+      // Document Expiry Template
       {
         id: 'template-document-expiry',
         name: 'document-expiry',
-        description: 'Generic notification sent when any document is about to expire',
+        description:
+          'Generic notification sent when any document is about to expire',
         type: 'email',
         subject: 'Document Renewal Reminder - {{days_left}} Days',
         body: `<!DOCTYPE html>
@@ -1496,7 +1504,7 @@ async function testAllTemplates() {
         tenantId: 'global',
       },
 
-            // Document Expired Template - NEW
+      // Document Expired Template - NEW
       {
         id: 'template-document-expired',
         name: 'document-expired',
@@ -1617,10 +1625,11 @@ async function testAllTemplates() {
       },
 
       // Rostering
-            {
+      {
         id: 'carer-assigned-to-cluster',
         name: 'carer-assigned-to-cluster',
-        description: 'Notification sent when a carer has been assigned to a new cluster',
+        description:
+          'Notification sent when a carer has been assigned to a new cluster',
         type: 'email',
         subject: 'New cluster assignment',
         body: `<html>
@@ -1789,14 +1798,14 @@ async function testAllTemplates() {
 
     // Test events for each template
     const testEvents = [
-      {
-        event_type: 'user.email.verified',
-        data: { user_id: 'user-test-001', user_email: 'tonna.ezugwu@prolianceltd.com', user_name: 'Test User' }
-      },
       // {
-      //   event_type: 'user.login.succeeded', 
-      //   data: { user_id: 'user-test-001', user_email: 'tegaokorare91@gmail.com', ip_address: '192.168.1.1', user_agent: 'Chrome', timestamp: new Date().toISOString() }
+      //   event_type: 'user.email.verified',
+      //   data: { user_id: 'user-test-001', user_email: 'tonna.ezugwu@prolianceltd.com', user_name: 'Test User' }
       // },
+      {
+        event_type: 'user.login.succeeded', 
+        data: { user_id: 'user-test-001', user_email: 'tegaokorare91@gmail.com', ip_address: '192.168.1.1', user_agent: 'Chrome', timestamp: new Date().toISOString() }
+      },
       // {
       //   event_type: 'auth.2fa.code.requested',
       //   data: { user_id: 'user-test-001', user_email: 'tegaokorare91@gmail.com', '2fa_code': '123456', '2fa_method': 'email', ip_address: '192.168.1.1', user_agent: 'Chrome', expires_in_seconds: 300 }
@@ -1815,38 +1824,38 @@ async function testAllTemplates() {
       //     document_type: 'resume'
       //   }
       // },
-      {
-        event_type: 'interview.scheduled',
-        data: {
-          application_id: 'app-test-67890',
-          dashboard_url: 'https://inboxquality.com',
-          full_name: 'Jane Doe',
-          email: 'support@prolianceltd.com',
-          job_requisition_id: 'job-67890',
-          job_requisition_title: 'HR Personel',
-          status: 'scheduled',
-          interview_start_date_time: '2025-09-19T10:00:00+01:00',
-          interview_end_date_time: '2025-09-19T11:00:00+01:00',
-          meeting_mode: 'virtual',
-          meeting_link: 'https://zoom.us/j/123456789',
-          message: 'Please join 5 minutes early',
-          timezone: 'Africa/Lagos',
-          schedule_id: 'schedule-test-999'
-        }
-      },
-      {
-        event_type: 'user.document.expiry.warning',
-        data: {
-          user_email: 'tonna.ezugwu@prolianceltd.com',
-          full_name: 'John Doe',
-          document_type: 'Right to Work Permit',
-          document_name: 'UK Work Visa',
-          expiry_date: '2025-01-27',
-          days_left: '7',
-          message: 'Your work authorization is expiring soon. Please renew immediately to avoid employment disruption.',
-          timezone: 'GMT'
-        }
-      },
+      // {
+      //   event_type: 'interview.scheduled',
+      //   data: {
+      //     application_id: 'app-test-67890',
+      //     dashboard_url: 'https://inboxquality.com',
+      //     full_name: 'Jane Doe',
+      //     email: 'support@prolianceltd.com',
+      //     job_requisition_id: 'job-67890',
+      //     job_requisition_title: 'HR Personel',
+      //     status: 'scheduled',
+      //     interview_start_date_time: '2025-09-19T10:00:00+01:00',
+      //     interview_end_date_time: '2025-09-19T11:00:00+01:00',
+      //     meeting_mode: 'virtual',
+      //     meeting_link: 'https://zoom.us/j/123456789',
+      //     message: 'Please join 5 minutes early',
+      //     timezone: 'Africa/Lagos',
+      //     schedule_id: 'schedule-test-999'
+      //   }
+      // },
+      // {
+      //   event_type: 'user.document.expiry.warning',
+      //   data: {
+      //     user_email: 'tonna.ezugwu@prolianceltd.com',
+      //     full_name: 'John Doe',
+      //     document_type: 'Right to Work Permit',
+      //     document_name: 'UK Work Visa',
+      //     expiry_date: '2025-01-27',
+      //     days_left: '7',
+      //     message: 'Your work authorization is expiring soon. Please renew immediately to avoid employment disruption.',
+      //     timezone: 'GMT'
+      //   }
+      // },
       // Add this test event to your testEvents array in test-all-templates.ts
       // {
       //   event_type: 'candidate.shortlisted.gaps',

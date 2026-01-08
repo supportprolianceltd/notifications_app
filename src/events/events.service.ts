@@ -251,7 +251,8 @@ export class EventsService {
       subject: 'Your Account Has Been Created',
       template: 'user-account-created',
       context: {
-        user_name: event.data.user_name,
+        username: event.data.username,
+        login_email: event.data.login_email,
         company_name: event.data.company_name,
         temp_password: event.data.temp_password, // if applicable
         login_link: event.data.login_link,
