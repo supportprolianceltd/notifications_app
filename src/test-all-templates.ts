@@ -235,7 +235,7 @@ async function testAllTemplates() {
         id: 'template-password-reset',
         name: 'password-reset',
         type: 'email',
-        subject: 'Reset Your Password',
+        subject: 'Reset Your Password - {{company_name}}',
         body: `<!DOCTYPE html>
 <html>
 <head>
@@ -247,13 +247,13 @@ async function testAllTemplates() {
         .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; padding: 40px 30px; text-align: center; }
         .header h1 { margin: 0; font-size: 28px; font-weight: 300; letter-spacing: 1px; }
         .content { padding: 40px 30px; color: #333; line-height: 1.6; }
-        .reset-section { background: #f8f9fa; border-radius: 8px; padding: 30px; margin: 30px 0; text-align: center; border-left: 4px solid #667eea; }
-        .reset-btn { display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; text-decoration: none; padding: 16px 32px; border-radius: 50px; font-weight: 600; font-size: 16px; margin: 20px 0; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3); transition: all 0.3s ease; }
-        .reset-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4); }
+        .token-section { background: #f8f9fa; border-radius: 8px; padding: 30px; margin: 30px 0; text-align: center; border-left: 4px solid #667eea; }
+        .token-code { background: #fff; border: 2px dashed #667eea; border-radius: 6px; padding: 20px; font-family: 'Courier New', monospace; font-size: 18px; font-weight: bold; color: #333; word-break: break-all; margin: 20px 0; }
+        .copy-instruction { font-size: 14px; color: #666; margin-bottom: 10px; }
         .warning { background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 6px; padding: 15px; margin: 20px 0; color: #856404; }
         .footer { background: #f8f9fa; padding: 20px 30px; text-align: center; color: #666; font-size: 14px; border-top: 1px solid #e9ecef; }
         .footer a { color: #667eea; text-decoration: none; }
-        @media (max-width: 600px) { .container { margin: 20px; } .header, .content, .footer { padding: 20px; } }
+        @media (max-width: 600px) { .container { margin: 20px; } .header, .content, .footer { padding: 20px; } .token-code { font-size: 16px; padding: 15px; } }
     </style>
 </head>
 <body>
@@ -263,14 +263,13 @@ async function testAllTemplates() {
         </div>
         <div class="content">
             <p>Hello {{user_name}},</p>
-            <p>We received a request to reset your password for your account. Don't worry, we've got you covered!</p>
+            <p>We received a request to reset your password for your {{company_name}} account. Don't worry, we've got you covered!</p>
 
-            <div class="reset-section">
-                <h3 style="margin-top: 0; color: #333;">Click the button below to reset your password</h3>
-                <p>This link will expire in 24 hours for security reasons.</p>
-                <a href="{{reset_link}}" class="reset-btn">Reset My Password</a>
-                <p style="margin-bottom: 0; font-size: 14px; color: #666;">If the button doesn't work, copy and paste this link into your browser:<br>
-                <a href="{{reset_link}}" style="color: #667eea; word-break: break-all;">{{reset_link}}</a></p>
+            <div class="token-section">
+                <h3 style="margin-top: 0; color: #333;">Your Password Reset Token</h3>
+                <p class="copy-instruction">Copy the token below and paste it into the reset form:</p>
+                <div class="token-code">{{reset_link}}</div>
+                <p style="margin-bottom: 0; font-size: 14px; color: #666;">This token will expire in 24 hours for security reasons.</p>
             </div>
 
             <div class="warning">
@@ -279,10 +278,11 @@ async function testAllTemplates() {
 
             <p>If you have any questions or need assistance, don't hesitate to contact our support team.</p>
 
-            <p>Best regards,<br>The E3OS Team</p>
+            <p>Best regards,<br>The {{company_name}} Team</p>
         </div>
         <div class="footer">
-            <p>This email was sent to {{user_email}}</p>
+            <p>This email was sent to {{user_email}} | &copy; {{year}} {{company_name}}. All rights reserved.</p>
+            <p><a href="{{support_link}}">Contact Support</a> | <a href="{{privacy_link}}">Privacy Policy</a></p>
         </div>
     </div>
 </body>
