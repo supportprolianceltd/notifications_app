@@ -231,6 +231,66 @@ async function testAllTemplates() {
         isActive: true,
         tenantId: 'global',
       },
+      {
+        id: 'template-password-reset',
+        name: 'password-reset',
+        type: 'email',
+        subject: 'Reset Your Password',
+        body: `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 40px auto; background: #fff; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); overflow: hidden; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; padding: 40px 30px; text-align: center; }
+        .header h1 { margin: 0; font-size: 28px; font-weight: 300; letter-spacing: 1px; }
+        .content { padding: 40px 30px; color: #333; line-height: 1.6; }
+        .reset-section { background: #f8f9fa; border-radius: 8px; padding: 30px; margin: 30px 0; text-align: center; border-left: 4px solid #667eea; }
+        .reset-btn { display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; text-decoration: none; padding: 16px 32px; border-radius: 50px; font-weight: 600; font-size: 16px; margin: 20px 0; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3); transition: all 0.3s ease; }
+        .reset-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4); }
+        .warning { background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 6px; padding: 15px; margin: 20px 0; color: #856404; }
+        .footer { background: #f8f9fa; padding: 20px 30px; text-align: center; color: #666; font-size: 14px; border-top: 1px solid #e9ecef; }
+        .footer a { color: #667eea; text-decoration: none; }
+        @media (max-width: 600px) { .container { margin: 20px; } .header, .content, .footer { padding: 20px; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Password Reset</h1>
+        </div>
+        <div class="content">
+            <p>Hello {{user_name}},</p>
+            <p>We received a request to reset your password for your account. Don't worry, we've got you covered!</p>
+
+            <div class="reset-section">
+                <h3 style="margin-top: 0; color: #333;">Click the button below to reset your password</h3>
+                <p>This link will expire in 24 hours for security reasons.</p>
+                <a href="{{reset_link}}" class="reset-btn">Reset My Password</a>
+                <p style="margin-bottom: 0; font-size: 14px; color: #666;">If the button doesn't work, copy and paste this link into your browser:<br>
+                <a href="{{reset_link}}" style="color: #667eea; word-break: break-all;">{{reset_link}}</a></p>
+            </div>
+
+            <div class="warning">
+                <strong>⚠️ Security Notice:</strong> If you didn't request this password reset, please ignore this email. Your password will remain unchanged.
+            </div>
+
+            <p>If you have any questions or need assistance, don't hesitate to contact our support team.</p>
+
+            <p>Best regards,<br>The E3OS Team</p>
+        </div>
+        <div class="footer">
+            <p>This email was sent to {{user_email}}</p>
+        </div>
+    </div>
+</body>
+</html>`,
+        language: 'en',
+        isActive: true,
+        tenantId: 'global',
+      },
 
       // Application Workflow Templates
       {
