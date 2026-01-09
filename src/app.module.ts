@@ -37,8 +37,7 @@ import { MetricsModule } from './metrics/metrics.module';
       imports: [AppConfigModule],
       useFactory: (configService: AppConfigService) => ({
         connection: {
-          host: configService.redisHost,
-          port: configService.redisPort,
+          url: configService.redisUrl,
         },
       }),
       inject: [AppConfigService],

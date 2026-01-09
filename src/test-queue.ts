@@ -10,8 +10,7 @@ async function test() {
   // Create a queue instance
   const queue = new Queue('events', {
     connection: {
-      host: configService.redisHost,
-      port: configService.redisPort,
+      url: configService.redisUrl,
     },
   });
 

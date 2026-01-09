@@ -23,8 +23,7 @@ async function testAllTemplates() {
     const appConfigService = new AppConfigService(configService);
 
     const redisConfig = {
-      host: appConfigService.redisHost,
-      port: appConfigService.redisPort,
+      url: appConfigService.redisUrl,
     };
 
     // Create all missing templates

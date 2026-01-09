@@ -6,20 +6,12 @@ import { ConfigService } from '@nestjs/config';
 export class AppConfigService {
   constructor(public configService: ConfigService) {}
 
-  get redisHost(): string {
-    const host = this.configService.get<string>('REDIS_HOST');
-    if (!host) {
-      throw new Error('REDIS_HOST is not defined in environment variables');
+  get redisUrl(): string {
+    const url = this.configService.get<string>('REDIS_URL');
+    if (!url) {
+      throw new Error('REDIS_URL is not defined in environment variables');
     }
-    return host;
-  }
-
-  get redisPort(): number {
-    const port = this.configService.get<number>('REDIS_PORT');
-    if (port === undefined) {
-      throw new Error('REDIS_PORT is not defined in environment variables');
-    }
-    return port;
+    return url;
   }
 
   get databaseUrl(): string {

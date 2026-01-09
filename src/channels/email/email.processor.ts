@@ -15,10 +15,8 @@ export const emailWorkerOptions: WorkerOptions = {
   // Redis connection is required by BullMQ WorkerOptions.
   // Provide connection details via environment variables (fallbacks provided).
   connection: {
-    host: process.env.REDIS_HOST || '127.0.0.1',
-    port: parseInt(process.env.REDIS_PORT || '6379'),
-    // password: process.env.REDIS_PASSWORD, // uncomment if needed
-  } as any,
+    url: process.env.REDIS_URL || 'redis://127.0.0.1:6379',
+  },
   limiter: {
     max: parseInt(process.env.EMAIL_WORKER_MAX || '10'), // max jobs per duration
     duration: parseInt(process.env.EMAIL_WORKER_DURATION || '1000'), // duration in ms

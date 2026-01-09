@@ -13,12 +13,11 @@ async function testCompleteFlow() {
   const appConfigService = new AppConfigService(configService);
 
   const redisConfig = {
-    host: appConfigService.redisHost,
-    port: appConfigService.redisPort,
+    url: appConfigService.redisUrl,
   };
 
   console.log('📊 Configuration loaded:');
-  console.log(`   - Redis: ${redisConfig.host}:${redisConfig.port}`);
+  console.log(`   - Redis: ${redisConfig.url}`);
   console.log(`   - Database: ${appConfigService.databaseUrl ? 'Connected' : 'Missing'}`);
   console.log('');
 
